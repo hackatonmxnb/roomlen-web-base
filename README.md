@@ -58,4 +58,4 @@ Custom CSS variables for the RoomLen brand:
 
 ---
 
-Built from CDMX 🇲🇽 | "Live. Rent. Earn."
+Built from 🇲🇽 | "Live. Rent. Earn."

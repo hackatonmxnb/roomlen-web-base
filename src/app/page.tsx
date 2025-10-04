@@ -51,8 +51,13 @@ function TopBar(){
     <header className="sticky top-0 z-40 backdrop-blur bg-white/70 ring-1 ring-slate-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl" style={{background:"linear-gradient(135deg,var(--rf-green),var(--rf-blue))"}} />
-          <div className="font-extrabold tracking-tight text-xl"><span style={{color:"var(--rf-ink)"}}>Room</span><span style={{color:"var(--rf-blue)"}}>Len</span></div>
+          <a href="/" className="flex items-center gap-3 hover:opacity-80 transition">
+            <img 
+              src="/roomlenlogo.png" 
+              alt="RoomLen Logo" 
+              className="h-14 w-auto"
+            />
+          </a>
         </div>
         <nav className="hidden md:flex items-center gap-6 text-sm">
           <a href="#how" className="text-slate-600 hover:text-slate-900">How it works</a>
@@ -425,7 +430,7 @@ function Footer(){
           <div className="font-bold">RoomLen</div>
         </div>
         <div className="text-sm text-slate-500">
-          © {new Date().getFullYear()} RoomLen. Built from CDMX. &quot;Live. Rent. Earn.&quot;
+          © {new Date().getFullYear()} RoomLen. Built from 🇲🇽. &quot;Live. Rent. Earn.&quot;
         </div>
       </div>
     </footer>
