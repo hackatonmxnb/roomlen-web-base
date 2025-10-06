@@ -1,4 +1,13 @@
+'use client';
+
 import React from "react";
+import dynamic from 'next/dynamic';
+
+// Importación dinámica para evitar problemas de renderizado en el lado del servidor
+const WalletConnect = dynamic(
+  () => import('@/components/WalletConnect'),
+  { ssr: false }
+);
 
 interface TopbarProps {
   tab: "portfolio" | "market";
@@ -39,11 +48,7 @@ export function Topbar({ tab, onTab }: TopbarProps) {
           <span className="text-slate-400">Payments</span>
           <span className="text-slate-400">Settings</span>
         </nav>
-        <div className="flex items-center gap-2">
-          <span className="pill">KYC ✓</span>
-          <span className="pill">Wallet: 0x…b9A</span>
-          <button className="btn btn-ghost">Add funds</button>
-        </div>
+        <WalletConnect />
       </div>
     </header>
   );
