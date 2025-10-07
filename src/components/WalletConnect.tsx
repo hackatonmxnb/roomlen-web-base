@@ -4,17 +4,13 @@ import { useState, useEffect } from 'react';
 import { web3Enable, web3Accounts } from '@polkadot/extension-dapp';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-interface WalletAccount {
-  address: string;
-  meta: {
-    name: string;
-    source: string;
-  };
-}
+import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
+
+type WalletAccount = InjectedAccountWithMeta;
 
 export default function WalletConnect() {
   const [api, setApi] = useState<ApiPromise | null>(null);
-  const [accounts, setAccounts] = useState<WalletAccount[]>([]);
+  const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +58,7 @@ export default function WalletConnect() {
       
       setAccounts(allAccounts);
       setSelectedAccount(allAccounts[0].address);
+      console.log(allAccounts[0].address);
       
     } catch (err) {
       console.error('Error connecting wallet:', err);
