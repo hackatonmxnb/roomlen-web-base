@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Topbar } from "@/components/investor/Topbar";
 import { KPIBar } from "@/components/investor/KPIBar";
 import { CashflowStrip } from "@/components/investor/CashflowStrip";
@@ -9,9 +9,31 @@ import { MarketFilters } from "@/components/investor/MarketFilters";
 import { OfferGrid } from "@/components/investor/OfferGrid";
 import { DealDrawer } from "@/components/investor/DealDrawer";
 import { Footer } from "@/components/investor/Footer";
-import { SAMPLE_POSITIONS, SAMPLE_OFFERS } from "@/lib/investor/sampleData";
 import { summarize } from "@/lib/investor/utils";
 import type { Position, Offer } from "@/lib/investor/types";
+
+// Import contract configurations
+import { lendingProtocolAddress, rentalNftAddress } from "@/lib/contractAddresses";
+import LendingProtocolABI from "@/lib/abi/LendingProtocol.json";
+import RentalNFTABI from "@/lib/abi/VerifiableRentalAgreementNFT.json";
+
+// Import Viem hooks and utilities
+import { createPublicClient, http, formatUnits } from "viem";
+import { moonbaseAlpha } from "viem/chains";
+
+// Create a public client to interact with the blockchain
+const publicClient = createPublicClient({
+  chain: moonbaseAlpha,
+  transport: http(),
+});
+
+// Helper to format date from timestamp
+const formatDate = (timestamp: bigint) => {
+  if (timestamp === 0n) return "N/A";
+  return new Date(Number(timestamp) * 1000).toLocaleDateString();
+};
+
+import { TRRInfoModal } from "@/components/investor/TRRInfoModal";
 
 // RoomLen — Investor Dashboard (MVP)
 // Next.js App Router page with modular components
@@ -21,11 +43,107 @@ export default function InvestorDashboard() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState({ tier: "all", term: "all" });
   const [selected, setSelected] = useState<Position | Offer | null>(null);
+  const [showTRRModalFor, setShowTRRModalFor] = useState<Position | null>(null);
 
-  const positions = useMemo(() => SAMPLE_POSITIONS, []);
-  const offers = useMemo(() => SAMPLE_OFFERS, []);
+  // --- REAL-TIME BLOCKCHAIN DATA ---
+  const [positions, setPositions] = useState<Position[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [portfolio, setPortfolio] = useState<any>({}); // Using any for now
 
-  const portfolio = useMemo(() => summarize(positions), [positions]);
+  useEffect(() => {
+    const fetchContractData = async () => {
+      try {
+        const loanCount = await publicClient.readContract({
+          address: lendingProtocolAddress as `0x${string}`,
+          abi: LendingProtocolABI,
+          functionName: "getLoansCount",
+        });
+
+        const riskTiers = await publicClient.readContract({
+            address: lendingProtocolAddress as `0x${string}`,
+            abi: LendingProtocolABI,
+            functionName: "getRiskTiers",
+        });
+
+        const loanPromises = [];
+        for (let i = 0; i < Number(loanCount); i++) {
+          loanPromises.push(
+            publicClient.readContract({
+              address: lendingProtocolAddress as `0x${string}`,
+              abi: LendingProtocolABI,
+              functionName: "getLoan",
+              args: [BigInt(i)],
+            })
+          );
+        }
+        const rawLoans = await Promise.all(loanPromises);
+
+        const fullLoanDetails = await Promise.all(rawLoans.map(async (loan: any, index) => {
+            const agreementData: any = await publicClient.readContract({
+                address: rentalNftAddress as `0x${string}`,
+                abi: RentalNFTABI,
+                functionName: "getAgreementData",
+                args: [loan.nftId],
+            });
+
+            const tier = (riskTiers as any[]).find(t => t.scoreThreshold <= agreementData.tenantScore) || riskTiers[riskTiers.length-1];
+            const irrAPR = tier ? Number(tier.interestRateBps) / 100 : 0;
+
+            return { loan, agreementData, tier, irrAPR, index };
+        }));
+
+        const allPositions: Position[] = fullLoanDetails
+            .filter(({ loan }) => loan.status !== 0) // 0 = Requested
+            .map(({ loan, agreementData, irrAPR, index }) => ({
+                id: index.toString(),
+                property: agreementData.propertyName,
+                location: agreementData.location,
+                advance: parseFloat(formatUnits(loan.amount, 18)),
+                rent: parseFloat(formatUnits(agreementData.rentAmount, 18)),
+                termMonths: loan.termMonths,
+                irrAPR: irrAPR,
+                nextPayment: formatDate(loan.dueDate),
+                stream: "Healthy", // Placeholder
+                status: loan.status === 2 ? "Completed" : loan.status === 3 ? "Default" : "Active",
+            }));
+
+        const allOffers: Offer[] = fullLoanDetails
+            .filter(({ loan }) => loan.status === 0) // 0 = Requested
+            .map(({ loan, agreementData, tier, irrAPR, index }) => ({
+                id: index.toString(),
+                property: agreementData.propertyName,
+                location: agreementData.location,
+                advance: parseFloat(formatUnits(loan.amount, 18)),
+                rent: parseFloat(formatUnits(agreementData.rentAmount, 18)),
+                termMonths: loan.termMonths,
+                irrAPR: irrAPR,
+                ocPct: tier ? Number(tier.ocBps) / 100 : 0,
+                haircutPct: tier ? Number(tier.haircutBps) / 100 : 0,
+                chain: "Moonbase Alpha",
+                currency: "DEV",
+                riskTier: String.fromCharCode(65 + (riskTiers as any[]).indexOf(tier)), // A, B, C...
+            }));
+
+        setPositions(allPositions);
+        setOffers(allOffers);
+
+      } catch (error) {
+        console.error("Failed to fetch contract data:", error);
+        setPositions([]);
+        setOffers([]);
+      }
+    };
+
+    fetchContractData();
+  }, []);
+
+  useEffect(() => {
+    if (positions) {
+      setPortfolio(summarize(positions));
+    }
+  }, [positions]);
+
+  // --- END REAL-TIME BLOCKCHAIN DATA ---
 
   const filteredOffers = useMemo(() => {
     return offers.filter((o: Offer) => {
@@ -52,7 +170,7 @@ export default function InvestorDashboard() {
           <>
             <KPIBar portfolio={portfolio} />
             <CashflowStrip portfolio={portfolio} />
-            <PositionsTable positions={positions} onOpen={setSelected} />
+            <PositionsTable positions={positions} onOpen={setSelected} onShowTRR={setShowTRRModalFor} />
           </>
         )}
 
@@ -71,6 +189,10 @@ export default function InvestorDashboard() {
 
       {selected && (
         <DealDrawer deal={selected} onClose={() => setSelected(null)} />
+      )}
+
+      {showTRRModalFor && (
+        <TRRInfoModal position={showTRRModalFor} onClose={() => setShowTRRModalFor(null)} />
       )}
 
       <Footer />

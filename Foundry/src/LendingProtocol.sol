@@ -7,58 +7,51 @@ import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {VerifiableRentalAgreementNFT} from "./VerifiableRentalAgreementNFT.sol";
-import {LenderReceiptNFT} from "./LenderReceiptNFT.sol";
+import {TokenReciboRoomlen} from "./TokenReciboRoomlen.sol";
 
 /**
- * @title LendingProtocol
- * @author RoomLen Team
- * @notice Contrato principal que gestiona el mercado P2P de préstamos respaldados por NFTs de alquiler.
- * @dev Orquesta el ciclo de vida de los préstamos, desde la solicitud hasta el repago,
- *      e implementa una lógica de valoración de riesgo on-chain basada en tiers.
+ * @title Protocolo de Préstamos RoomLen
+ * @author Equipo RoomLen
+ * @notice Contrato principal que gestiona un mercado P2P de préstamos colateralizados por NFTs de contratos de alquiler.
+ * @dev Orquesta el ciclo de vida completo de un préstamo (solicitud, fondeo, repago y liquidación).
+ *      Implementa una lógica de valoración de riesgo on-chain para determinar las condiciones del préstamo.
  */
 contract LendingProtocol is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     VerifiableRentalAgreementNFT public immutable rentalNft;
     IERC20 public immutable wmxnbToken;
-    LenderReceiptNFT public lenderReceiptNft;
+    TokenReciboRoomlen public lenderReceiptNft;
 
     enum LoanStatus { Requested, Funded, Repaid, Defaulted }
 
     struct Loan {
-        uint256 nftId;
-        address borrower;
-        address lender;
-        uint96 amount;
-        uint64 fundingDate;
-        uint64 dueDate;
-        uint16 termInMonths;
-        LoanStatus status;
+        uint256 nftId;          // ID del NFT colateralizado.
+        address borrower;       // Dirección del prestatario original.
+        address lender;         // Dirección del prestamista original.
+        uint96 amount;          // Monto del préstamo en la menor unidad del token.
+        uint64 fundingDate;     // Timestamp de cuando el préstamo fue fondeado.
+        uint64 dueDate;         // Timestamp de la fecha de vencimiento para el repago.
+        uint16 termInMonths;    // Plazo del préstamo en meses.
+        LoanStatus status;      // Estado actual del préstamo.
     }
 
     struct RiskTierParams {
-        uint8 scoreThreshold;
-        uint16 haircutBps;
-        uint16 ocBps;
-        uint16 interestRateBps;
+        uint8 scoreThreshold;       // Puntuación de crédito mínima para calificar a este tier.
+        uint16 haircutBps;          // Porcentaje de recorte de valor (en basis points).
+        uint16 ocBps;               // Porcentaje de sobrecolateralización (en basis points).
+        uint16 interestRateBps;     // Tasa de interés anual (en basis points).
     }
 
     Loan[] public loans;
     mapping(uint256 => uint256) public loanIndexByNftId;
     RiskTierParams[] public riskTiers;
 
-    // Mappings for query optimization
     mapping(address => uint256[]) private _loansByBorrower;
     mapping(address => uint256[]) private _fundedLoansByLender;
 
     event LoanRequested(uint256 indexed loanId, address indexed borrower, uint256 indexed nftId, uint96 maxAdvance);
-    event LoanFunded(
-        uint256 indexed loanId,
-        address indexed borrower,
-        address indexed lender,
-        uint96 amount,
-        uint16 interestRateBps
-    );
+    event LoanFunded(uint256 indexed loanId, address indexed borrower, address indexed lender, uint96 amount, uint16 interestRateBps);
     event LoanRepaid(uint256 indexed loanId);
     event LoanDefaulted(uint256 indexed loanId, address indexed lender);
     event RiskTierSet(uint8 tierIndex, RiskTierParams params);
@@ -66,12 +59,20 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
     constructor(address _nftAddress, address _wmxnbAddress, address _lenderReceiptNftAddress, address _initialOwner)
         Ownable(_initialOwner)
     {
-        require(_nftAddress != address(0) && _wmxnbAddress != address(0) && _lenderReceiptNftAddress != address(0), "LP: Zero address");
+        require(_nftAddress != address(0) && _wmxnbAddress != address(0) && _lenderReceiptNftAddress != address(0), "LP: Direcciones invalidas");
         rentalNft = VerifiableRentalAgreementNFT(_nftAddress);
         wmxnbToken = IERC20(_wmxnbAddress);
-        lenderReceiptNft = LenderReceiptNFT(_lenderReceiptNftAddress);
+        lenderReceiptNft = TokenReciboRoomlen(_lenderReceiptNftAddress);
     }
 
+    /**
+     * @notice Define un nuevo tier de riesgo para el protocolo.
+     * @dev Solo el owner puede llamar a esta función. Los tiers se usan para calcular el riesgo y las condiciones de nuevos préstamos.
+     * @param scoreThreshold Puntuación de crédito mínima para este tier.
+     * @param haircutBps Porcentaje de recorte de valor en BPS (ej: 1000 para 10%).
+     * @param ocBps Porcentaje de sobrecolateralización en BPS (ej: 1000 para 10%).
+     * @param interestRateBps Tasa de interés anual en BPS (ej: 1500 para 15%).
+     */
     function setRiskTier(uint8 scoreThreshold, uint16 haircutBps, uint16 ocBps, uint16 interestRateBps) external onlyOwner {
         riskTiers.push(RiskTierParams({
             scoreThreshold: scoreThreshold,
@@ -82,9 +83,14 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
         emit RiskTierSet(uint8(riskTiers.length - 1), riskTiers[riskTiers.length - 1]);
     }
 
+    /**
+     * @notice Solicita un préstamo colateralizando un NFT de contrato de alquiler.
+     * @dev El prestatario debe ser el dueño del NFT. El contrato tomará custodia del NFT.
+     * @param _nftId El ID del token VRA-NFT que se usará como colateral.
+     */
     function requestLoan(uint256 _nftId) external nonReentrant {
-        require(rentalNft.ownerOf(_nftId) == msg.sender, "LP: Not NFT owner");
-        require(loanIndexByNftId[_nftId] == 0, "LP: Loan already requested for this NFT");
+        require(rentalNft.ownerOf(_nftId) == msg.sender, "LP: No es el propietario del NFT");
+        require(loanIndexByNftId[_nftId] == 0, "LP: Prestamo ya solicitado para este NFT");
 
         VerifiableRentalAgreementNFT.AgreementData memory data = rentalNft.getAgreementData(_nftId);
         RiskTierParams memory tier = _getTierForScore(data.tenantScore);
@@ -102,7 +108,7 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
             termInMonths: data.termMonths,
             status: LoanStatus.Requested
         }));
-        loanIndexByNftId[_nftId] = loanId + 1; // Lock the NFT to this loan
+        loanIndexByNftId[_nftId] = loanId + 1; // Previene el re-uso del mismo NFT para otro préstamo.
 
         _loansByBorrower[msg.sender].push(loanId);
 
@@ -111,10 +117,15 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
         rentalNft.transferFrom(msg.sender, address(this), _nftId);
     }
 
+    /**
+     * @notice Fondea un préstamo que ha sido previamente solicitado.
+     * @dev Transfiere el monto del préstamo al prestatario y acuña un LRN-NFT para el prestamista.
+     * @param _loanId El ID del préstamo a fondear.
+     */
     function fundLoan(uint256 _loanId) external nonReentrant {
         Loan storage loan = loans[_loanId];
-        require(loan.status == LoanStatus.Requested, "LP: Loan not available for funding");
-        require(loan.borrower != msg.sender, "LP: Cannot fund own loan");
+        require(loan.status == LoanStatus.Requested, "LP: Prestamo no disponible para fondeo");
+        require(loan.borrower != msg.sender, "LP: No puede fondear su propio prestamo");
 
         loan.lender = msg.sender;
         loan.status = LoanStatus.Funded;
@@ -132,10 +143,16 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
         lenderReceiptNft.mint(msg.sender, _loanId);
     }
 
+    /**
+     * @notice Repaga un préstamo fondeado.
+     * @dev El prestatario transfiere el monto principal más intereses al prestamista actual (dueño del LRN-NFT).
+     *      Al completarse, el prestatario recupera su NFT colateral.
+     * @param _loanId El ID del préstamo a repagar.
+     */
     function repayLoan(uint256 _loanId) external nonReentrant {
         Loan storage loan = loans[_loanId];
-        require(loan.status == LoanStatus.Funded, "LP: Loan not funded or already repaid");
-        require(loan.borrower == msg.sender, "LP: Only borrower can repay");
+        require(loan.status == LoanStatus.Funded, "LP: Prestamo no fondeado o ya pagado");
+        require(loan.borrower == msg.sender, "LP: Solo el prestatario puede repagar");
 
         RiskTierParams memory tier = _getTierForScore(rentalNft.getAgreementData(loan.nftId).tenantScore);
         uint256 interest = _calculateInterest(loan.amount, tier.interestRateBps, block.timestamp - loan.fundingDate);
@@ -154,10 +171,16 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
         rentalNft.transferFrom(address(this), loan.borrower, loan.nftId);
     }
 
+    /**
+     * @notice Liquida un préstamo que ha entrado en default (impago).
+     * @dev Permite a cualquier dirección liquidar un préstamo si la fecha actual ha superado la fecha de vencimiento.
+     *      El colateral (VRA-NFT) se transfiere al prestamista actual.
+     * @param _loanId El ID del préstamo a liquidar.
+     */
     function liquidateLoan(uint256 _loanId) external nonReentrant {
         Loan storage loan = loans[_loanId];
-        require(loan.status == LoanStatus.Funded, "LP: Loan not active");
-        require(block.timestamp > loan.dueDate, "LP: Loan not yet due for liquidation");
+        require(loan.status == LoanStatus.Funded, "LP: El prestamo no esta activo");
+        require(block.timestamp > loan.dueDate, "LP: El prestamo aun no ha vencido");
 
         loan.status = LoanStatus.Defaulted;
 
@@ -165,10 +188,8 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
 
         emit LoanDefaulted(_loanId, currentLender);
 
-        // Transfer collateral to the lender
         rentalNft.transferFrom(address(this), currentLender, loan.nftId);
 
-        // Burn the lender's receipt
         lenderReceiptNft.burn(_loanId);
     }
 
@@ -178,7 +199,7 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
                 return riskTiers[i];
             }
         }
-        revert("LP: No suitable risk tier for this score");
+        revert("LP: No existe un tier de riesgo para esta puntuacion");
     }
 
     function _calculateMaxAdvance(
@@ -218,5 +239,17 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
 
     function getLoanIdsByLender(address _lender) external view returns (uint256[] memory) {
         return _fundedLoansByLender[_lender];
+    }
+
+    /**
+     * @notice Obtiene una vista consolidada de los datos de un préstamo para la UI o metadatos de NFT.
+     * @param _loanId El ID del préstamo a consultar.
+     * @return LoanUIData Una estructura con los datos más relevantes del préstamo.
+     */
+    function getLoanUIData(uint256 _loanId) external view returns (Loan memory, RiskTierParams memory, VerifiableRentalAgreementNFT.AgreementData memory) {
+        Loan memory loan = loans[_loanId];
+        VerifiableRentalAgreementNFT.AgreementData memory agreementData = rentalNft.getAgreementData(loan.nftId);
+        RiskTierParams memory tier = _getTierForScore(agreementData.tenantScore);
+        return (loan, tier, agreementData);
     }
 }
