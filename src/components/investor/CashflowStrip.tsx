@@ -6,8 +6,18 @@ interface CashflowStripProps {
 }
 
 export function CashflowStrip({ portfolio }: CashflowStripProps) {
-  const months = portfolio.cashflow;
+  const months = portfolio.cashflow || [];
   const max = Math.max(...months.map((m) => m.income), 1);
+  
+  if (months.length === 0) {
+    return (
+      <section className="mt-6 card">
+        <div className="text-center py-8 text-slate-500">
+          No cashflow data available
+        </div>
+      </section>
+    );
+  }
   
   return (
     <section className="mt-6 card">

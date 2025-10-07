@@ -35,6 +35,13 @@ const formatDate = (timestamp: bigint) => {
 
 import { TRRInfoModal } from "@/components/investor/TRRInfoModal";
 
+type RiskTier = {
+  scoreThreshold: number;
+  haircutBps: bigint;
+  ocBps: bigint;
+  interestRateBps: bigint;
+};
+
 // RoomLen — Investor Dashboard (MVP)
 // Next.js App Router page with modular components
 
@@ -63,7 +70,7 @@ export default function InvestorDashboard() {
             address: lendingProtocolAddress as `0x${string}`,
             abi: LendingProtocolABI,
             functionName: "getRiskTiers",
-        });
+        }) as RiskTier[];
 
         const loanPromises = [];
         for (let i = 0; i < Number(loanCount); i++) {
@@ -86,7 +93,7 @@ export default function InvestorDashboard() {
                 args: [loan.nftId],
             });
 
-            const tier = (riskTiers as any[]).find(t => t.scoreThreshold <= agreementData.tenantScore) || riskTiers[riskTiers.length-1];
+            const tier = riskTiers.find(t => t.scoreThreshold <= Number(agreementData.tenantScore)) || riskTiers[riskTiers.length-1];
             const irrAPR = tier ? Number(tier.interestRateBps) / 100 : 0;
 
             return { loan, agreementData, tier, irrAPR, index };
@@ -121,7 +128,7 @@ export default function InvestorDashboard() {
                 haircutPct: tier ? Number(tier.haircutBps) / 100 : 0,
                 chain: "Moonbase Alpha",
                 currency: "DEV",
-                riskTier: String.fromCharCode(65 + (riskTiers as any[]).indexOf(tier)), // A, B, C...
+                riskTier: String.fromCharCode(65 + riskTiers.indexOf(tier)), // A, B, C...
             }));
 
         setPositions(allPositions);
