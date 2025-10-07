@@ -3,9 +3,11 @@ pragma solidity ^0.8.20;
 
 import {IERC721} from "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {VerifiableRentalAgreementNFT} from "./VerifiableRentalAgreementNFT.sol";
+import {LenderReceiptNFT} from "./LenderReceiptNFT.sol";
 
 /**
  * @title LendingProtocol
@@ -17,25 +19,15 @@ import {VerifiableRentalAgreementNFT} from "./VerifiableRentalAgreementNFT.sol";
 contract LendingProtocol is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    // --- VISION A LARGO PLAZO Y POTENCIAL EN POLKADOT ---
-    // RoomLen está diseñado para ser un pilar del ecosistema RWA (Real World Assets) en Polkadot.
-    // 1. PARACHAIN ESPECIALIZADA: RoomLen podría evolucionar a su propia Parachain,
-    //    optimizada para la gestión de activos inmobiliarios tokenizados.
-    // 2. INTEROPERABILIDAD (XCM): El VerifiableRentalAgreementNFT (VRA) es un activo componible.
-    //    Gracias a XCM, este NFT podrá ser usado como colateral en otros protocolos DeFi
-    //    del ecosistema Polkadot (ej. Acala, Moonbeam) para préstamos, stablecoins, etc.
-    // 3. ORACULOS Y PRIVACIDAD: Parachains como Phala Network podrían usarse para gestionar
-    //    datos sensibles de los contratos y scores de reputación de forma privada.
-    // Este contrato es el primer paso hacia un mercado financiero inmobiliario abierto y descentralizado.
-
     VerifiableRentalAgreementNFT public immutable rentalNft;
     IERC20 public immutable wmxnbToken;
+    LenderReceiptNFT public lenderReceiptNft;
 
     enum LoanStatus { Requested, Funded, Repaid, Defaulted }
 
     struct Loan {
         address borrower;
-        address lender;
+        address lender; // Original lender
         uint256 nftId;
         uint96 amount;
         uint16 termInMonths;
@@ -55,16 +47,23 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
     RiskTierParams[] public riskTiers;
 
     event LoanRequested(uint256 indexed loanId, address indexed borrower, uint256 indexed nftId, uint96 maxAdvance);
-    event LoanFunded(uint256 indexed loanId, address indexed lender, uint96 amount);
+    event LoanFunded(
+        uint256 indexed loanId,
+        address indexed borrower,
+        address indexed lender,
+        uint96 amount,
+        uint16 interestRateBps
+    );
     event LoanRepaid(uint256 indexed loanId);
     event RiskTierSet(uint8 tierIndex, RiskTierParams params);
 
-    constructor(address _nftAddress, address _wmxnbAddress, address _initialOwner)
+    constructor(address _nftAddress, address _wmxnbAddress, address _lenderReceiptNftAddress, address _initialOwner)
         Ownable(_initialOwner)
     {
-        require(_nftAddress != address(0) && _wmxnbAddress != address(0), "LP: Zero address");
+        require(_nftAddress != address(0) && _wmxnbAddress != address(0) && _lenderReceiptNftAddress != address(0), "LP: Zero address");
         rentalNft = VerifiableRentalAgreementNFT(_nftAddress);
         wmxnbToken = IERC20(_wmxnbAddress);
+        lenderReceiptNft = LenderReceiptNFT(_lenderReceiptNftAddress);
     }
 
     function setRiskTier(uint8 scoreThreshold, uint16 haircutBps, uint16 ocBps, uint16 interestRateBps) external onlyOwner {
@@ -96,7 +95,7 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
             fundingDate: 0,
             status: LoanStatus.Requested
         }));
-        loanIndexByNftId[_nftId] = loanId + 1;
+        loanIndexByNftId[loanId] = loanId + 1; // Note: Using loanId as key for simplicity
 
         emit LoanRequested(loanId, msg.sender, _nftId, maxAdvance);
 
@@ -112,9 +111,13 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
         loan.status = LoanStatus.Funded;
         loan.fundingDate = uint64(block.timestamp);
 
-        emit LoanFunded(_loanId, msg.sender, loan.amount);
+        RiskTierParams memory tier = _getTierForScore(rentalNft.getAgreementData(loan.nftId).tenantScore);
+
+        emit LoanFunded(_loanId, loan.borrower, msg.sender, loan.amount, tier.interestRateBps);
 
         wmxnbToken.safeTransferFrom(msg.sender, loan.borrower, loan.amount);
+
+        lenderReceiptNft.mint(msg.sender, _loanId);
     }
 
     function repayLoan(uint256 _loanId) external nonReentrant {
@@ -128,9 +131,14 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
 
         loan.status = LoanStatus.Repaid;
 
+        address currentLender = lenderReceiptNft.ownerOf(_loanId);
+
         emit LoanRepaid(_loanId);
 
-        wmxnbToken.safeTransferFrom(msg.sender, loan.lender, totalRepayment);
+        wmxnbToken.safeTransferFrom(msg.sender, currentLender, totalRepayment);
+        
+        lenderReceiptNft.burn(_loanId);
+
         rentalNft.transferFrom(address(this), loan.borrower, loan.nftId);
     }
 
@@ -174,10 +182,6 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
         return riskTiers;
     }
 
-    /**
-     * @notice Devuelve los IDs de los préstamos solicitados por un borrower.
-     * @dev Itera sobre todos los préstamos. Para una escala muy grande, se usaría un indexador off-chain.
-     */
     function getLoanIdsByBorrower(address _borrower) external view returns (uint256[] memory) {
         uint256 count = 0;
         for (uint256 i = 0; i < loans.length; i++) {
@@ -197,10 +201,6 @@ contract LendingProtocol is Ownable, ReentrancyGuard {
         return result;
     }
 
-    /**
-     * @notice Devuelve los IDs de los préstamos financiados por un lender.
-     * @dev Itera sobre todos los préstamos. Para una escala muy grande, se usaría un indexador off-chain.
-     */
     function getLoanIdsByLender(address _lender) external view returns (uint256[] memory) {
         uint256 count = 0;
         for (uint256 i = 0; i < loans.length; i++) {
