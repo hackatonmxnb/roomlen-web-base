@@ -67,7 +67,8 @@ function TopBar(){
         </nav>
         <div className="flex items-center gap-3">
           <a className="btn-outline ring-slate-300 hover:ring-slate-400" href="#contact">Contact</a>
-          <a className="btn" style={{background:"var(--rf-blue)"}} href="/investor">Open App</a>
+          <a className="btn" style={{background:"var(--rf-green)"}} href="/owner">For Owners</a>
+          <a className="btn" style={{background:"var(--rf-blue)"}} href="/investor">For Investors</a>
         </div>
       </div>
     </header>
@@ -217,7 +218,7 @@ function TrackCard({title, highlights, accent}:{title:string, highlights:string[
         {highlights.map((h,i)=> <li key={i}>{h}</li>)}
       </ul>
       <div className="mt-6 flex gap-3">
-        <a className="btn" style={{background:accent}} href="/investor">Open App</a>
+        <a className="btn" style={{background:accent}} href={title === "For owners" ? "/owner" : "/investor"}>Open App</a>
         <a className="btn-outline ring-slate-300 hover:ring-slate-400" href="#calc">Try calculator</a>
       </div>
     </div>
