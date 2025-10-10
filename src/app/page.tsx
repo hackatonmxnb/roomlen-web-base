@@ -45,8 +45,14 @@ function BrandTokens() {
   );
 }
 
+import { useWallet } from "@/lib/WalletProvider";
+import Link from "next/link";
+import WalletConnect from "@/components/WalletConnect";
+
 // -------------------- Top Bar --------------------
 function TopBar(){
+  const { isConnected } = useWallet();
+
   return (
     <header className="sticky top-0 z-40 backdrop-blur bg-white/70 ring-1 ring-slate-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
@@ -66,9 +72,13 @@ function TopBar(){
           <a href="#faq" className="text-slate-600 hover:text-slate-900">FAQ</a>
         </nav>
         <div className="flex items-center gap-3">
-          <a className="btn-outline ring-slate-300 hover:ring-slate-400" href="#contact">Contact</a>
-          <a className="btn" style={{background:"var(--rf-green)"}} href="/owner">For Owners</a>
-          <a className="btn" style={{background:"var(--rf-blue)"}} href="/investor">For Investors</a>
+          {isConnected && (
+            <>
+              <Link className="btn-outline ring-slate-300 hover:ring-slate-400 hidden sm:inline-flex" href="/owner">Owner</Link>
+              <Link className="btn hidden sm:inline-flex" style={{background:"var(--rf-blue)"}} href="/investor">Investor</Link>
+            </>
+          )}
+          <WalletConnect />
         </div>
       </div>
     </header>

@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 "use client";
 
 import React, { useMemo, useState } from "react";
@@ -149,10 +150,215 @@ export default function OwnerDashboard() {
       )}
 
       <Footer />
+=======
+'use client';
+
+import React, { useState } from 'react';
+import { ethers } from 'ethers';
+import { useWallet } from '@/lib/WalletProvider';
+import WalletConnect from '@/components/WalletConnect';
+
+// --- ABI Y DIRECCIÓN DEL CONTRATO ---
+const VRA_NFT_ABI = [
+    "function mint(address owner, string memory tokenURI, uint96 rentAmount, uint16 termMonths, uint8 tenantScore) returns (uint256)"
+];
+const VRA_NFT_ADDRESS = '0x1acB65533d0f5DBB99D6F3c30AcAd0A5499325c2'; // VerifiableRentalAgreementNFT
+
+// --- TIPOS Y DATOS DE EJEMPLO ---
+type PropertyStatus = 'Ready' | 'Not Ready';
+interface Property {
+  id: number;
+  name: string;
+  location: string;
+  rent: number;
+  status: PropertyStatus;
+}
+
+const mockProperties: Property[] = [
+  { id: 1, name: 'Loft Reforma 210', location: 'CDMX • Juárez', rent: 10000, status: 'Ready' },
+  { id: 2, name: 'Depto Roma Nte 88', location: 'CDMX • Roma', rent: 8000, status: 'Not Ready' },
+  { id: 3, name: 'Casa Lomas 34', location: 'CDMX • Lomas', rent: 12000, status: 'Ready' },
+];
+
+// --- SUB-COMPONENTES DE LA UI ---
+
+const TipsCard = () => (
+  <div className="bg-white p-6 rounded-2xl shadow-sm ring-1 ring-slate-200">
+    <h3 className="font-semibold text-lg text-slate-800">Tips</h3>
+    <ul className="mt-3 space-y-3 text-sm text-slate-600 list-disc list-inside">
+      <li>Upload the full lease PDF with signatures to speed up the AI score.</li>
+      <li>Security deposit helps lower OC; renewals improve on-time score.</li>
+      <li>Keep tenant contact updated for smooth rent streaming.</li>
+    </ul>
+  </div>
+);
+
+const OffersCard = () => (
+  <div className="bg-white p-6 rounded-2xl shadow-sm ring-1 ring-slate-200">
+    <h3 className="font-semibold text-lg text-slate-800">Offers <span className="text-sm text-slate-500 font-normal ml-1">0 new</span></h3>
+    <p className="mt-2 text-sm text-slate-600 text-center py-4">No offers yet. Publish a lease to the marketplace.</p>
+  </div>
+);
+
+const ActiveAdvanceCard = () => (
+  <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+    <div className="font-semibold">No active advance</div>
+    <div className="text-sm text-slate-600">Import a lease and request an advance to get started.</div>
+  </section>
+);
+
+const Header = () => (
+  <header className="bg-white ring-1 ring-slate-200">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <a href="/" className="flex items-center gap-3 hover:opacity-80 transition">
+        <img src="/roomlenlogo.png" alt="RoomLen Logo" className="h-14 w-auto" />
+      </a>
+      <div className="flex items-center gap-4">
+        <div className="text-right hidden sm:block">
+          <div className="font-bold text-slate-800">Owner</div>
+          <div className="text-xs text-slate-500">KYC ✓ • Payout: CLABE ****1234</div>
+        </div>
+        <WalletConnect />
+      </div>
+    </div>
+  </header>
+);
+
+const TokenizeModal = ({ prop, onClose, onConfirm }: { prop: Property; onClose: () => void; onConfirm: (tokenURI: string, tenantScore: number) => void; }) => {
+    const [tokenURI, setTokenURI] = useState('ipfs://example-uri');
+    const [tenantScore, setTenantScore] = useState(85);
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full space-y-6" onClick={(e) => e.stopPropagation()}>
+                <h2 className="text-2xl font-bold text-slate-900">Tokenize Lease: {prop.name}</h2>
+                <div>
+                    <label htmlFor="tokenURI" className="block text-sm font-medium text-slate-700">Token URI</label>
+                    <input type="text" name="tokenURI" value={tokenURI} onChange={(e) => setTokenURI(e.target.value)} className="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                    <p className="mt-2 text-xs text-slate-500">Link to off-chain metadata (IPFS, Arweave, etc.).</p>
+                </div>
+                <div>
+                    <label htmlFor="tenantScore" className="block text-sm font-medium text-slate-700">Tenant Score (0-100)</label>
+                    <input type="number" name="tenantScore" value={tenantScore} onChange={(e) => setTenantScore(parseInt(e.target.value, 10))} className="mt-1 block w-full rounded-xl border-slate-300 shadow-sm" />
+                </div>
+                <div className="flex justify-end gap-4 pt-4">
+                    <button onClick={onClose} className="btn-outline ring-slate-300 hover:ring-slate-400">Cancel</button>
+                    <button onClick={() => onConfirm(tokenURI, tenantScore)} className="btn bg-blue-600 hover:bg-blue-700">Confirm & Tokenize</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- COMPONENTE PRINCIPAL DE LA PÁGINA ---
+
+export default function OwnerDashboardPage() {
+  const { isConnected, signer, account } = useWallet();
+  const [properties, setProperties] = useState<Property[]>(mockProperties);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProp, setSelectedProp] = useState<Property | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [txInfo, setTxInfo] = useState<{ hash?: string; error?: string }>({});
+
+  const handleOpenTokenizeModal = (prop: Property) => {
+    setSelectedProp(prop);
+    setIsModalOpen(true);
+    setTxInfo({});
+  };
+
+  const handleTokenizeConfirm = async (tokenURI: string, tenantScore: number) => {
+    if (!signer || !account || !selectedProp) return;
+
+    setIsLoading(true);
+    setTxInfo({});
+
+    try {
+        const contract = new ethers.Contract(VRA_NFT_ADDRESS, VRA_NFT_ABI, signer);
+        const rentAmount = ethers.parseUnits(selectedProp.rent.toString(), 18); // Asumiendo 18 decimales
+        
+        const tx = await contract.mint(account, tokenURI, rentAmount, 12, tenantScore); // Hardcoding termMonths a 12 por ahora
+        setTxInfo({ hash: tx.hash });
+        await tx.wait();
+
+        // Actualizar UI en tiempo real
+        setProperties(prev => prev.map(p => p.id === selectedProp.id ? { ...p, status: 'Ready' } : p));
+        setIsModalOpen(false);
+
+    } catch (err: any) {
+        console.error("Tokenization failed:", err);
+        setTxInfo({ error: err.reason || 'Transaction failed.' });
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  const renderDashboard = () => (
+    <>
+      <Header />
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <ActiveAdvanceCard />
+            <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold">Your properties</div>
+                <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-slate-200 bg-white">{properties.length} total</span>
+              </div>
+              <div className="mt-4 divide-y divide-slate-100">
+                {properties.map(prop => (
+                  <div key={prop.id} className="py-3 flex items-center justify-between gap-3">
+                    <div>
+                      <div className="font-medium">{prop.name}</div>
+                      <div className="text-slate-600 text-sm">{prop.location} • Rent ${prop.rent.toLocaleString()} / mo</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-slate-200 ${prop.status === 'Ready' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>{prop.status}</span>
+                      {prop.status === 'Ready' ? (
+                          <button className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold shadow-sm hover:shadow transition bg-green-600 text-white">Get advance</button>
+                      ) : (
+                          <button onClick={() => handleOpenTokenizeModal(prop)} className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold shadow-sm hover:shadow transition bg-blue-600 text-white">Tokenize</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+          <div className="space-y-6">
+            <OffersCard />
+            <TipsCard />
+          </div>
+        </div>
+        { (txInfo.hash || txInfo.error) && (
+            <div className={`mt-6 p-4 rounded-xl ${txInfo.hash ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                <p className="font-semibold">{txInfo.hash ? 'Transaction Sent!' : 'Error'}</p>
+                {txInfo.hash ? <a href={`https://paseo.moonscan.io/tx/${txInfo.hash}`} target="_blank" rel="noopener noreferrer" className="text-sm break-all underline">View on Moonscan: {txInfo.hash}</a> : <p className="text-sm">{txInfo.error}</p>}
+            </div>
+        )}
+      </main>
+      <Footer />
+      {isModalOpen && selectedProp && <TokenizeModal prop={selectedProp} onClose={() => setIsModalOpen(false)} onConfirm={handleTokenizeConfirm} />}
+    </>
+  );
+
+  const renderConnectMessage = () => (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <img src="/roomlenlogo.png" alt="RoomLen Logo" className="h-20 w-auto mb-6" />
+        <h2 className="text-2xl font-bold text-slate-800">Owner Dashboard</h2>
+        <p className="mt-2 text-slate-600">Please connect your wallet to continue.</p>
+        <div className="mt-6"><WalletConnect /></div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-white">
+        {isConnected ? renderDashboard() : renderConnectMessage()}
+>>>>>>> Stashed changes
     </div>
   );
 }
 
+<<<<<<< Updated upstream
 // Risk engine (fixed tiers)
 function scoreAndPrice(i: any) {
   const s =
@@ -201,3 +407,8 @@ function solveIRRMonthly(negAdvance: number, rent: number, n: number) {
   }
   return (lo + hi) / 2;
 }
+=======
+const Footer = () => (
+    <footer className="py-10 text-center text-sm text-slate-500">© {new Date().getFullYear()} RoomLen — Owner dashboard</footer>
+);
+>>>>>>> Stashed changes

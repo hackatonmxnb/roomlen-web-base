@@ -6,7 +6,18 @@ interface CashflowStripProps {
 }
 
 export function CashflowStrip({ portfolio }: CashflowStripProps) {
+<<<<<<< Updated upstream
   const months = portfolio.cashflow || [];
+=======
+  // Use optional chaining and default to an empty array to prevent runtime errors
+  const months = portfolio?.cashflow || [];
+
+  // Return null if there's no data to display, preventing further errors
+  if (months.length === 0) {
+    return null;
+  }
+
+>>>>>>> Stashed changes
   const max = Math.max(...months.map((m) => m.income), 1);
   
   if (months.length === 0) {

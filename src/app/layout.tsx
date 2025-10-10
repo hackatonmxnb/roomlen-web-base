@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { WalletProvider } from "@/lib/WalletProvider"; // Importa el proveedor
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RoomLen - Rent-backed advances for property owners",
-  description: "Convert a signed lease into upfront capital today. Investors receive monthly rent streams via on-chain escrow.",
+  title: "RoomLEN - Rent-backed advances",
+  description: "Convert a signed lease into upfront capital today.",
 };
 
 export default function RootLayout({
@@ -13,7 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={inter.className}>
+        <WalletProvider>{children}</WalletProvider> 
+      </body>
     </html>
   );
 }
