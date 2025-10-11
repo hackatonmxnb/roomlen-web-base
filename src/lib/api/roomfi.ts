@@ -24,6 +24,13 @@ export const marketplaceApi = {
   getMarketplace: async () => {
     return roomfiClient.get<MarketplaceResponse>('/lending/marketplace');
   },
+
+  /**
+   * Create a new marketplace listing
+   */
+  createListing: async (userId: string, data: CreateListingRequest) => {
+    return roomfiClient.post<CreateListingResponse>(`/lending/marketplace/new?user_id=${userId}`, data);
+  },
 };
 
 /**
@@ -120,4 +127,21 @@ export interface InvestmentResponse {
   message?: string;
   loan_id?: string;
   investment_id?: string;
+}
+
+/**
+ * Marketplace Listing Request/Response Types
+ */
+export interface CreateListingRequest {
+  property_id: number;
+  requested_amount: number;
+  monthly_rent: number;
+  term_months: number;
+  purpose: string;
+}
+
+export interface CreateListingResponse {
+  success: boolean;
+  message?: string;
+  loan_application_id?: string;
 }
