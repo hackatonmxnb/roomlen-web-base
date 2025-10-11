@@ -34,6 +34,7 @@ const formatDate = (timestamp: bigint) => {
 };
 
 import { TRRInfoModal } from "@/components/investor/TRRInfoModal";
+import { useMarketplace } from "@/hooks/useMarketplace";
 
 type RiskTier = {
   scoreThreshold: number;
@@ -56,6 +57,13 @@ export default function InvestorDashboard() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [portfolio, setPortfolio] = useState<any>({}); // Using any for now
+
+  // --- MARKETPLACE API DATA ---
+  const { 
+    data: marketplaceListings, 
+    isLoading: isLoadingMarketplace, 
+    error: marketplaceError 
+  } = useMarketplace();
 
   useEffect(() => {
     const fetchContractData = async () => {
@@ -144,6 +152,35 @@ export default function InvestorDashboard() {
     fetchContractData();
   }, []);
 
+  // Merge blockchain offers with marketplace API data
+  useEffect(() => {
+    console.log('Marketplace listings received:', marketplaceListings);
+    
+    if (marketplaceListings && marketplaceListings.length > 0) {
+      // Combine blockchain offers with API marketplace listings
+      // Get current blockchain offer IDs to avoid duplicates
+      setOffers(currentOffers => {
+        const blockchainIds = new Set(currentOffers.map(o => o.id));
+        const uniqueMarketplaceOffers = marketplaceListings
+          .filter(listing => !blockchainIds.has(listing.id))
+          .map(listing => ({
+            ...listing,
+            // Ensure all required Offer fields are present
+            property: listing.property || 'N/A',
+            location: listing.location || 'N/A',
+            chain: listing.chain || 'API',
+            currency: listing.currency || 'USD',
+            riskTier: listing.riskTier || 'N/A',
+          }));
+
+        console.log('Unique marketplace offers to add:', uniqueMarketplaceOffers);
+        
+        // Merge offers: blockchain first, then unique marketplace listings
+        return [...currentOffers, ...uniqueMarketplaceOffers];
+      });
+    }
+  }, [marketplaceListings]);
+
   useEffect(() => {
     if (positions) {
       setPortfolio(summarize(positions));
@@ -153,7 +190,10 @@ export default function InvestorDashboard() {
   // --- END REAL-TIME BLOCKCHAIN DATA ---
 
   const filteredOffers = useMemo(() => {
-    return offers.filter((o: Offer) => {
+    console.log('All offers:', offers);
+    console.log('Filters:', { query, filters });
+    
+    const filtered = offers.filter((o: Offer) => {
       const q = query.toLowerCase();
       const matchQ = [o.property, o.location, o.chain, o.currency].some((x: string) =>
         x.toLowerCase().includes(q)
@@ -166,6 +206,9 @@ export default function InvestorDashboard() {
         (filters.term === "long" && o.termMonths > 12);
       return matchQ && matchTier && matchTerm;
     });
+    
+    console.log('Filtered offers:', filtered);
+    return filtered;
   }, [offers, query, filters]);
 
   return (
@@ -189,6 +232,17 @@ export default function InvestorDashboard() {
               filters={filters}
               setFilters={setFilters}
             />
+            {marketplaceError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+                <p className="font-semibold">Error loading marketplace data:</p>
+                <p className="text-sm">{marketplaceError}</p>
+              </div>
+            )}
+            {isLoadingMarketplace && offers.length === 0 && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-slate-600">Loading marketplace...</div>
+              </div>
+            )}
             <OfferGrid offers={filteredOffers} onOpen={setSelected} />
           </>
         )}

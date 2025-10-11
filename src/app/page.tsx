@@ -102,11 +102,6 @@ function Hero(){
             <a className="btn" href="#calc">Estimate your advance</a>
             <a className="btn-outline ring-slate-300 hover:ring-slate-400" href="#how">See how it works</a>
           </div>
-          <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
-            <span className="badge">🏆 1st Place – Bitso (DeFi)</span>
-            <span className="badge">🥉 3rd – mobil3 by Monad</span>
-            <span className="badge">🎯 QED mentorship (soon)</span>
-          </div>
         </div>
         <div className="relative">
           <HeroCard />
