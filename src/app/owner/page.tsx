@@ -1,28 +1,31 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useWallet } from '@/lib/WalletProvider';
 import WalletConnect from '@/components/WalletConnect';
 
-// --- ABI Y DIRECCIÓN DEL CONTRATO (Placeholder) ---
-const VRA_NFT_ABI = ["function mint(address owner, string memory tokenURI, uint96 rentAmount, uint16 termMonths, uint8 tenantScore) returns (uint256)"];
-const VRA_NFT_ADDRESS = '0x1acB65533d0f5DBB99D6F3c30AcAd0A5499325c2';
+// --- ABIs Y DIRECCIONES ---
+import VRA_NFT_ABI from '@/lib/abi/VerifiableRentalAgreementNFT.json';
+import LENDING_PROTOCOL_ABI from '@/lib/abi/LendingProtocol.json';
+import { lendingProtocolAddress, rentalNftAddress as VRA_NFT_ADDRESS } from '@/lib/contractAddresses';
+
 
 // --- TIPOS DE DATOS ---
 type TLeaseStatus = 'Not Tokenized' | 'Tokenized' | 'Escrow Active';
 interface Lease {
   id: string; property: string; location: string; rent: number; status: TLeaseStatus; termMonths: number;
   onTimeRatio?: number; rentToIncome?: number; depositMonths?: number; docsQuality?: number; marketIndex?: number;
+  nftId?: number; // Add nftId to link to the contract
 }
 interface Advance { id: string; amount: number; property: string; location: string; fundedOn: string; remaining: number; ocPct: number; haircutPct: number; stream: string; termMonths: number; rent: number; }
 interface OwnerOffer { id: string; property: string; location: string; advance: number; irrAPR: number; termMonths: number; ocPct: number; haircutPct: number; fees: number; chain: string; riskTier: string; rent: number; }
 
-// --- DATOS DE EJEMPLO ---
-const SAMPLE_LEASES: Lease[] = [
-    { id: 'L001', property: 'Loft Reforma 210', location: 'CDMX • Juárez', rent: 10000, status: 'Tokenized', termMonths: 12, onTimeRatio: 1, rentToIncome: 0.3, depositMonths: 2, docsQuality: 0.95, marketIndex: 0.9 },
-    { id: 'L002', property: 'Depto Roma Nte 88', location: 'CDMX • Roma', rent: 8000, status: 'Not Tokenized', termMonths: 12, onTimeRatio: 0.95, rentToIncome: 0.4, depositMonths: 1, docsQuality: 0.8, marketIndex: 0.85 },
-    { id: 'L003', property: 'Casa Lomas 34', location: 'CDMX • Lomas', rent: 12000, status: 'Tokenized', termMonths: 18, onTimeRatio: 0.98, rentToIncome: 0.25, depositMonths: 1, docsQuality: 0.9, marketIndex: 0.95 },
+// --- DATOS DE PRUEBA ---
+const MOCK_LEASES: Lease[] = [
+  { id: 'mock1', property: 'Loft Reforma 210', location: 'CDMX • Juárez', rent: 10000, status: 'Not Tokenized', termMonths: 12, onTimeRatio: 0.98, rentToIncome: 0.3, depositMonths: 2, docsQuality: 0.9, marketIndex: 1.1 },
+  { id: 'mock2', property: 'Depto Roma Nte 88', location: 'CDMX • Roma', rent: 8000, status: 'Not Tokenized', termMonths: 12, onTimeRatio: 0.92, rentToIncome: 0.4, depositMonths: 1, docsQuality: 0.7, marketIndex: 1.0 },
+  { id: 'mock3', property: 'Casa Lomas 34', location: 'CDMX • Lomas', rent: 12000, status: 'Not Tokenized', termMonths: 18, onTimeRatio: 1.0, rentToIncome: 0.25, depositMonths: 2, docsQuality: 1.0, marketIndex: 1.2 },
 ];
 
 // --- COMPONENTES DE UI ---
@@ -41,21 +44,69 @@ const Header = () => (
 
 const ActiveAdvanceCard = ({ advance }: { advance: Advance | null }) => {
     if (!advance) return (
-        <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200"><div className="font-semibold">No active advance</div><div className="text-sm text-slate-600">Import a lease and request an advance to get started.</div></section>
+        <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200"><div className="font-semibold">No active advance</div><div className="text-sm text-slate-600">Request an advance on one of your tokenized properties to get started.</div></section>
     );
-    return <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200"><h3 className="font-semibold text-lg">Active Advance</h3>{/* UI for active advance... */}</section>;
+    return (
+        <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <h3 className="font-semibold text-lg text-green-600">Active Advance</h3>
+            <div className="mt-3 grid grid-cols-2 gap-4">
+                <div>
+                    <div className="text-sm text-slate-500">Property</div>
+                    <div className="font-semibold text-slate-800">{advance.property}</div>
+                </div>
+                <div>
+                    <div className="text-sm text-slate-500">Funded On</div>
+                    <div className="font-semibold text-slate-800">{advance.fundedOn}</div>
+                </div>
+                <div className="p-4 bg-green-50 rounded-xl col-span-2">
+                    <div className="text-sm text-green-700">Advance Amount</div>
+                    <div className="font-bold text-2xl text-green-800">${advance.amount.toLocaleString()}</div>
+                </div>
+                 <div className="p-4 bg-slate-50 rounded-xl">
+                    <div className="text-sm text-slate-500">Term</div>
+                    <div className="font-bold text-xl text-slate-800">{advance.termMonths} months</div>
+                </div>
+                 <div className="p-4 bg-slate-50 rounded-xl">
+                    <div className="text-sm text-slate-500">Monthly Rent</div>
+                    <div className="font-bold text-xl text-slate-800">${advance.rent.toLocaleString()}</div>
+                </div>
+            </div>
+        </section>
+    );
 };
 
-const PropertiesCard = ({ leases, onGetAdvance, onTokenize }: { leases: Lease[], onGetAdvance: (lease: Lease) => void, onTokenize: (lease: Lease) => void }) => (
+const PropertiesCard = ({ leases, onGetAdvance }: { leases: Lease[], onGetAdvance: (lease: Lease) => void }) => (
     <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <div className="flex items-center justify-between"><div className="font-semibold">Your properties</div><span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-slate-200 bg-white">{leases.length} total</span></div>
+        <div className="flex items-center justify-between"><div className="font-semibold">Your Properties</div><span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-slate-200 bg-white">{leases.length} total</span></div>
+        <div className="mt-4 divide-y divide-slate-100">
+            {leases.length === 0 ? (
+                <div className="py-3 text-center text-slate-500">No properties tokenized yet.</div>
+            ) : leases.map(lease => (
+                <div key={lease.id} className="py-3 flex items-center justify-between gap-3">
+                    <div><div className="font-medium">{lease.property}</div><div className="text-slate-600 text-sm">{lease.location} • Rent ${lease.rent.toLocaleString()} / mo</div></div>
+                    <div className="flex items-center gap-2">
+                         <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 bg-green-100 text-green-800`}>{lease.status}</span>
+                        <button onClick={() => onGetAdvance(lease)} className="btn-sm bg-green-600 text-white">Get advance</button>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </section>
+);
+
+const DemoPropertiesCard = ({ leases, onTokenize }: { leases: Lease[], onTokenize: (lease: Lease) => void }) => (
+    <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 border-2 border-dashed border-blue-300">
+        <div className="flex items-center justify-between">
+            <div className="font-semibold text-blue-800">Demo Properties</div>
+            <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-blue-200 bg-blue-50 text-blue-700">For Hackathon Demo</span>
+        </div>
+        <p className="text-sm text-slate-600 mt-2">These are sample properties. Use the 'Tokenize' button to create a verifiable NFT on the blockchain and enable advances.</p>
         <div className="mt-4 divide-y divide-slate-100">
             {leases.map(lease => (
                 <div key={lease.id} className="py-3 flex items-center justify-between gap-3">
                     <div><div className="font-medium">{lease.property}</div><div className="text-slate-600 text-sm">{lease.location} • Rent ${lease.rent.toLocaleString()} / mo</div></div>
                     <div className="flex items-center gap-2">
-                         <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 ${lease.status === 'Tokenized' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>{lease.status}</span>
-                        {lease.status === 'Tokenized' ? <button onClick={() => onGetAdvance(lease)} className="btn-sm bg-green-600 text-white">Get advance</button> : <button onClick={() => onTokenize(lease)} className="btn-sm bg-blue-600 text-white">Tokenize</button>}
+                        <button onClick={() => onTokenize(lease)} className="btn-sm bg-blue-600 text-white">Tokenize</button>
                     </div>
                 </div>
             ))}
@@ -82,7 +133,7 @@ const TipsCard = () => (
 );
 
 const TokenizePanel = ({ isOpen, onClose, onConfirm, lease }: { isOpen: boolean, onClose: () => void, onConfirm: (tokenURI: string, tenantScore: number) => Promise<void>, lease: Lease | null }) => {
-    const [tokenURI, setTokenURI] = useState('ipfs://example-uri');
+    const [tokenURI, setTokenURI] = useState('ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi'); // Example IPFS URI
     const [tenantScore, setTenantScore] = useState(85);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -141,44 +192,26 @@ const AdvanceFlowPanel = ({ flow, onClose, onImport, onRunAI, onPublish, onShowT
             case 'start':
                 return (
                     <>
-                        <h3 className="font-semibold text-lg">1. Import Data Source</h3>
-                        <p className="mt-1 text-slate-600">To calculate an advance, first import your verified lease data.</p>
+                        <h3 className="font-semibold text-lg">1. Request Advance</h3>
+                        <p className="mt-1 text-slate-600">Your tokenized lease is eligible for an advance. Review the details and publish to the marketplace.</p>
                         <div className="mt-4 space-y-4">
-                            <a href="https://roomfi.netlify.app" target="_blank" rel="noopener noreferrer" onClick={onImport} className="block w-full text-left p-4 rounded-xl ring-2 ring-slate-200 hover:ring-blue-500 transition-all">
-                                <div className="font-semibold">Connect with RoomFi</div>
-                                <div className="text-sm text-slate-500">Connects with the RoomFi app to identify your rental agreement NFTs and use them for tokenization.</div>
-                            </a>
-                            <button onClick={() => onShowToast('Coming Soon: Upload and analyze your PDF contract.')} className="w-full text-left p-4 rounded-xl ring-1 ring-slate-200 hover:bg-slate-50">
-                                <div className="font-semibold">Upload PDF</div>
-                                <div className="text-sm text-slate-500">(Coming Soon) Upload your PDF contract for our AI to extract the data and tokenize the agreement.</div>
-                            </button>
+                           <button onClick={onRunAI} className="w-full btn bg-green-600 hover:bg-green-700 text-lg">Estimate & Request Advance</button>
                         </div>
                     </>
                 );
-            case 'imported':
-                return (
-                    <div className="flex flex-col h-full">
-                        <div className="flex-grow">
-                            <h3 className="font-semibold text-lg">2. Run AI Pricing</h3>
-                            <p className="mt-2 text-slate-600">Data has been imported. Now, run the RoomLen AI risk engine to calculate a potential advance.</p>
-                        </div>
-                        <div className="flex-shrink-0 pt-4">
-                            <button onClick={onRunAI} className="w-full btn bg-green-600 hover:bg-green-700 text-lg">Estimate Advance with AI</button>
-                        </div>
-                    </div>
-                );
             case 'loading':
-                return (
+                 return (
                     <div className="flex flex-col items-center justify-center h-full text-center">
                         <img src="/roomlenlogo.png" alt="RoomLen Logo" className="h-24 w-auto animate-pulse" />
-                        <p className="mt-4 text-slate-600 font-semibold">Analyzing with AI...</p>
+                        <p className="mt-4 text-slate-600 font-semibold">Requesting loan on-chain...</p>
+                        <p className="text-sm text-slate-500">Please confirm the transaction in your wallet.</p>
                     </div>
                 );
             case 'result':
                 return (
                     <div className="flex flex-col h-full">
                         <div className="flex-grow">
-                            <h3 className="font-semibold text-lg">3. Review & Publish</h3>
+                            <h3 className="font-semibold text-lg">Review & Publish</h3>
                             {flow.ai ? (
                                 <div className="mt-4 grid grid-cols-2 gap-4 text-center">
                                     <div className="p-4 bg-slate-100 rounded-xl"><div className="text-sm text-slate-500">Risk Tier</div><div className="font-bold text-2xl">{flow.ai.tier}</div></div>
@@ -205,7 +238,7 @@ const AdvanceFlowPanel = ({ flow, onClose, onImport, onRunAI, onPublish, onShowT
         }
     };
 
-    return (
+     return (
         <>
             <div className={`fixed inset-0 z-40 transition-opacity duration-300 ${flow.open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onClose}>
                 <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm"></div>
@@ -226,6 +259,7 @@ const AdvanceFlowPanel = ({ flow, onClose, onImport, onRunAI, onPublish, onShowT
     );
 };
 
+
 const Toast = ({ message, show }: { message: string, show: boolean }) => {
     if (!show) return null;
     return (
@@ -239,25 +273,81 @@ const Footer = () => <footer className="py-10 text-center text-sm text-slate-500
 
 // --- COMPONENTE PRINCIPAL ---
 export default function OwnerDashboardPage() {
-    const { isConnected, signer, account } = useWallet();
-    const [leases, setLeases] = useState<Lease[]>(SAMPLE_LEASES);
+    const { isConnected, signer, account, provider } = useWallet();
+    const [leases, setLeases] = useState<Lease[]>([]);
+    const [demoLeases, setDemoLeases] = useState<Lease[]>(MOCK_LEASES);
     const [activeAdvance, setActiveAdvance] = useState<Advance | null>(null);
     const [offers, setOffers] = useState<OwnerOffer[]>([]);
     const [toast, setToast] = useState({ show: false, message: '' });
     const [txInfo, setTxInfo] = useState<{ hash?: string; error?: string }>({});
+    const [isLoading, setIsLoading] = useState(true);
 
-    // State for Tokenize flow
     const [tokenizeFlow, setTokenizeFlow] = useState({ isOpen: false, lease: null as Lease | null });
+    const [advanceFlow, setAdvanceFlow] = useState({ open: false, step: 'start' as 'start' | 'loading' | 'result' | 'published', lease: null as Lease | null, ai: null as any });
 
-    // State for Get Advance flow
-    const [advanceFlow, setAdvanceFlow] = useState({ open: false, step: 'start' as 'start' | 'imported' | 'loading' | 'result' | 'published', lease: null as Lease | null, ai: null as any });
+    useEffect(() => {
+        const fetchOwnerData = async () => {
+            if (!account || !provider) {
+                setIsLoading(false);
+                return;
+            }
+
+            setIsLoading(true);
+            try {
+                const lendingContract = new ethers.Contract(lendingProtocolAddress, LENDING_PROTOCOL_ABI, provider);
+                const loanIds = await lendingContract.getLoanIdsByBorrower(account);
+                const loanDataPromises = loanIds.map((loanId: any) => lendingContract.getLoanUIData(loanId));
+                const settledPromises = await Promise.allSettled(loanDataPromises);
+
+                const fetchedLeases: Lease[] = [];
+                let fetchedAdvance: Advance | null = null;
+
+                settledPromises.forEach((result, index) => {
+                    if (result.status === 'fulfilled') {
+                        const [loan, tier, agreement] = result.value;
+                        fetchedLeases.push({
+                            id: `L${Number(loan.nftId)}`,
+                            nftId: Number(loan.nftId),
+                            property: `NFT #${Number(loan.nftId)}`,
+                            location: 'On-chain',
+                            rent: parseFloat(ethers.formatUnits(agreement.rentAmount, 18)),
+                            termMonths: Number(agreement.termMonths),
+                            status: 'Tokenized',
+                        });
+                        if (Number(loan.status) === 1) { // Funded
+                             fetchedAdvance = {
+                                id: `A${index}`,
+                                amount: parseFloat(ethers.formatUnits(loan.amount, 18)),
+                                property: `NFT #${Number(loan.nftId)}`,
+                                location: 'On-chain',
+                                fundedOn: new Date(Number(loan.fundingDate) * 1000).toLocaleDateString(),
+                                remaining: 0, ocPct: Number(tier.ocBps) / 100, haircutPct: Number(tier.haircutBps) / 100, stream: '...',
+                                termMonths: Number(loan.termInMonths),
+                                rent: parseFloat(ethers.formatUnits(agreement.rentAmount, 18)),
+                            };
+                        }
+                    }
+                });
+                setLeases(fetchedLeases);
+                setActiveAdvance(fetchedAdvance);
+            } catch (error) {
+                console.error("Failed to fetch owner data:", error);
+                showToast("Could not fetch your data from the blockchain.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchOwnerData();
+    }, [account, provider]);
+
 
     const showToast = (message: string) => {
         setToast({ show: true, message });
         setTimeout(() => setToast({ show: false, message: '' }), 3000);
     };
 
-    // --- Tokenize Handlers ---
+    // --- Handlers ---
     function openTokenizePanel(lease: Lease) { setTokenizeFlow({ isOpen: true, lease }); }
     function closeTokenizePanel() { setTokenizeFlow({ isOpen: false, lease: null }); }
     async function handleTokenizeConfirm(tokenURI: string, tenantScore: number) {
@@ -266,62 +356,113 @@ export default function OwnerDashboardPage() {
         try {
             const contract = new ethers.Contract(VRA_NFT_ADDRESS, VRA_NFT_ABI, signer);
             const rentAmount = ethers.parseUnits(tokenizeFlow.lease.rent.toString(), 18);
-            const tx = await contract.mint(account, tokenURI, rentAmount, 12, tenantScore);
+            
+            // Arguments for the new mint function signature
+            const agreementId = Math.floor(Math.random() * 100000); // Using a random ID for demo
+            const propertyName = tokenizeFlow.lease.property;
+            const location = tokenizeFlow.lease.location;
+            const termMonths = tokenizeFlow.lease.termMonths;
+
+            const tx = await contract.mint(
+                account,
+                agreementId,
+                rentAmount,
+                termMonths,
+                tenantScore,
+                propertyName,
+                location
+            );
+            
             setTxInfo({ hash: tx.hash });
+            showToast("Tokenization transaction sent!");
             await tx.wait();
-            setLeases(prev => prev.map(l => l.id === tokenizeFlow.lease?.id ? { ...l, status: 'Tokenized' } : l));
+            showToast("Tokenization confirmed!");
+
+            const tokenizedLease = tokenizeFlow.lease;
+            const nftId = Math.floor(Math.random() * 10000); // Mock NFT ID for demo
+
+            const newOnChainLease: Lease = {
+                ...tokenizedLease,
+                status: 'Tokenized',
+                id: `L${nftId}`,
+                nftId: nftId,
+            };
+
+            setLeases(prev => [newOnChainLease, ...prev]);
+            setDemoLeases(prev => prev.filter(l => l.id !== tokenizedLease.id));
+            
             closeTokenizePanel();
+
         } catch (err: any) {
             console.error("Tokenization failed:", err);
-            setTxInfo({ error: err.reason || 'Transaction failed.' });
-            // Keep panel open on error so user can retry
+            const reason = err.reason || 'Transaction failed.';
+            setTxInfo({ error: reason });
+            showToast(reason);
         }
     }
 
-    // --- Advance Handlers ---
-    function openAdvanceFlow(lease: Lease) { setAdvanceFlow({ open: true, step: 'start', lease, ai: null }); }
+    async function openAdvanceFlow(lease: Lease) { 
+        if (!lease.nftId) return;
+        setAdvanceFlow({ open: true, step: 'start', lease, ai: null });
+    }
     function closeAdvanceFlow() { setAdvanceFlow({ open: false, step: 'start', lease: null, ai: null }); }
-    function handleImport() {
-        setTimeout(() => setAdvanceFlow(f => ({ ...f, step: 'imported' })), 500);
-    }
-    function runAIWithLoading() {
-        if (!advanceFlow.lease) return;
+    
+    async function handleRequestAdvance() {
+        if (!signer || !advanceFlow.lease?.nftId) return;
+
         setAdvanceFlow(f => ({ ...f, step: 'loading' }));
-        setTimeout(() => {
-            const l = advanceFlow.lease!;
-            const inputs = { rentMXN: l.rent, termMonths: l.termMonths, monthlyDiscPct: 1.5, onTimeRatio: l.onTimeRatio ?? 0.9, rentToIncome: l.rentToIncome ?? 0.32, depositMonths: l.depositMonths ?? 1, docsQuality: l.docsQuality ?? 0.9, marketIndex: l.marketIndex ?? 0.8, currencyMismatch: false };
-            const priced = scoreAndPrice(inputs);
-            setAdvanceFlow(f => ({ ...f, ai: priced, step: 'result' }));
-        }, 3000);
-    }
-    function publishToMarketplace() {
-        if (!advanceFlow.ai || !advanceFlow.lease) return;
-        setAdvanceFlow(f => ({ ...f, step: 'published' }));
+        setTxInfo({});
+        try {
+            const lendingContract = new ethers.Contract(lendingProtocolAddress, LENDING_PROTOCOL_ABI, signer);
+            const tx = await lendingContract.requestLoan(advanceFlow.lease.nftId);
+            setTxInfo({ hash: tx.hash });
+            await tx.wait();
+            setAdvanceFlow(f => ({ ...f, step: 'published' }));
+            showToast("Advance requested successfully!");
+        } catch (err: any) {
+            console.error("Advance request failed:", err);
+            const reason = err.reason || 'Transaction failed.';
+            setTxInfo({ error: reason });
+            showToast(reason);
+            setAdvanceFlow(f => ({ ...f, step: 'start' }));
+        }
     }
 
     const renderDashboard = () => (
         <>
             <Header />
             <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 space-y-6">
-                        <ActiveAdvanceCard advance={activeAdvance} />
-                        <PropertiesCard leases={leases} onGetAdvance={openAdvanceFlow} onTokenize={openTokenizePanel} />
-                        { (txInfo.hash || txInfo.error) && (
-                            <div className={`mt-6 p-4 rounded-xl ${txInfo.hash ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-                                <p className="font-semibold">{txInfo.hash ? 'Transaction Sent!' : 'Error'}</p>
-                                {txInfo.hash ? <a href={`https://paseo.moonscan.io/tx/${txInfo.hash}`} target="_blank" rel="noopener noreferrer" className="text-sm break-all underline">View on Moonscan: {txInfo.hash}</a> : <p className="text-sm">{txInfo.error}</p>}
-                            </div>
-                        )}
+                 {isLoading ? (
+                    <div className="text-center"><p className="font-semibold text-slate-600">Loading your on-chain data...</p></div>
+                ) : (
+                    <div className="grid lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2 space-y-6">
+                            <ActiveAdvanceCard advance={activeAdvance} />
+                            <PropertiesCard leases={leases} onGetAdvance={openAdvanceFlow} />
+                            {demoLeases.length > 0 && <DemoPropertiesCard leases={demoLeases} onTokenize={openTokenizePanel} />}
+                            { (txInfo.hash || txInfo.error) && (
+                                <div className={`mt-6 p-4 rounded-xl ${txInfo.hash ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                                    <p className="font-semibold">{txInfo.hash ? 'Transaction Sent!' : 'Error'}</p>
+                                    {txInfo.hash ? <a href={`https://paseo.moonscan.io/tx/${txInfo.hash}`} target="_blank" rel="noopener noreferrer" className="text-sm break-all underline">View on Moonscan: {txInfo.hash}</a> : <p className="text-sm">{txInfo.error}</p>}
+                                </div>
+                            )}
+                        </div>
+                        <div className="space-y-6">
+                            <OffersCard offers={offers} />
+                            <TipsCard />
+                        </div>
                     </div>
-                    <div className="space-y-6">
-                        <OffersCard offers={offers} />
-                        <TipsCard />
-                    </div>
-                </div>
+                )}
             </main>
             <TokenizePanel isOpen={tokenizeFlow.isOpen} onClose={closeTokenizePanel} onConfirm={handleTokenizeConfirm} lease={tokenizeFlow.lease} />
-            <AdvanceFlowPanel flow={advanceFlow} onClose={closeAdvanceFlow} onImport={handleImport} onRunAI={runAIWithLoading} onPublish={publishToMarketplace} onShowToast={showToast} />
+            <AdvanceFlowPanel 
+                flow={advanceFlow} 
+                onClose={closeAdvanceFlow} 
+                onImport={() => {}} 
+                onRunAI={handleRequestAdvance}
+                onPublish={handleRequestAdvance}
+                onShowToast={showToast} 
+            />
             <Toast message={toast.message} show={toast.show} />
             <Footer />
         </>
@@ -371,4 +512,3 @@ function solveIRRMonthly(negAdvance: number, rent: number, n: number) {
   }
   return (lo + hi) / 2;
 }
-

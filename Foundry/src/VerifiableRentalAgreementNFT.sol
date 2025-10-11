@@ -6,24 +6,26 @@ import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {ERC721} from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 
 /**
- * @title NFT de Contrato de Alquiler Verificable (VRA) - v2 (Gas Optimized)
+ * @title NFT de Contrato de Alquiler Verificable (VRA) - v3
  * @author Equipo RoomLen
  * @notice Representa un contrato de alquiler del mundo real como un NFT (ERC721).
- * @dev Híbrido: Almacena datos críticos para la lógica on-chain y el resto en un URI off-chain para optimizar gas.
- *      La acuñación está restringida al `owner` del contrato.
+ * @dev Almacena todos los datos relevantes on-chain para ser consumidos por otros contratos.
  */
 contract VerifiableRentalAgreementNFT is ERC721URIStorage, Ownable {
     uint256 private _tokenIdCounter;
 
     struct AgreementData {
-        uint96 rentAmount;      // Monto del alquiler en la menor unidad de la moneda.
-        uint16 termMonths;      // Plazo del contrato en meses.
-        uint8 tenantScore;      // Puntuación de riesgo del inquilino (0-100).
+        string propertyName;
+        string location;
+        uint96 rentAmount;
+        uint16 termMonths;
+        uint8 tenantScore;
+        uint32 agreementId;
     }
 
     mapping(uint256 => AgreementData) public agreementDetails;
 
-    event AgreementTokenized(uint256 indexed tokenId, address indexed owner, string tokenURI);
+    event AgreementTokenized(uint256 indexed tokenId, address indexed owner, uint32 agreementId);
 
     constructor(address initialOwner)
         ERC721("Verifiable Rental Agreement", "VRA")
@@ -33,34 +35,32 @@ contract VerifiableRentalAgreementNFT is ERC721URIStorage, Ownable {
     /**
      * @notice Acuña un nuevo NFT que representa un contrato de alquiler.
      * @dev Solo puede ser llamado por el `owner`.
-     * @param owner La dirección que recibirá el NFT.
-     * @param tokenURI El URI que apunta al archivo de metadatos JSON (con propertyName, location, etc.).
-     * @param rentAmount Monto del alquiler mensual (para lógica on-chain).
-     * @param termMonths Plazo del contrato en meses (para lógica on-chain).
-     * @param tenantScore Puntuación de riesgo del inquilino (para lógica on-chain).
-     * @return El ID del nuevo token acuñado.
      */
     function mint(
         address owner,
-        string calldata tokenURI,
+        uint32 agreementId,
         uint96 rentAmount,
         uint16 termMonths,
-        uint8 tenantScore
+        uint8 tenantScore,
+        string calldata propertyName,
+        string calldata location
     ) public onlyOwner returns (uint256) {
         require(tenantScore <= 100, "VRA: La puntuacion debe ser entre 0 y 100");
         _tokenIdCounter++;
         uint256 newItemId = _tokenIdCounter;
 
         _safeMint(owner, newItemId);
-        _setTokenURI(newItemId, tokenURI);
 
         agreementDetails[newItemId] = AgreementData({
+            propertyName: propertyName,
+            location: location,
             rentAmount: rentAmount,
             termMonths: termMonths,
-            tenantScore: tenantScore
+            tenantScore: tenantScore,
+            agreementId: agreementId
         });
 
-        emit AgreementTokenized(newItemId, owner, tokenURI);
+        emit AgreementTokenized(newItemId, owner, agreementId);
 
         return newItemId;
     }
@@ -68,11 +68,9 @@ contract VerifiableRentalAgreementNFT is ERC721URIStorage, Ownable {
     /**
      * @notice Obtiene los datos críticos asociados a un NFT para la lógica on-chain.
      * @dev revierte si el `tokenId` no existe.
-     * @param tokenId El ID del token a consultar.
-     * @return Una estructura con los metadatos críticos del contrato.
      */
     function getAgreementData(uint256 tokenId) external view returns (AgreementData memory) {
-        require(_exists(tokenId), "VRA: Consulta por un token que no existe");
+        _requireOwned(tokenId);
         return agreementDetails[tokenId];
     }
 
@@ -83,9 +81,7 @@ contract VerifiableRentalAgreementNFT is ERC721URIStorage, Ownable {
         _burn(tokenId);
     }
 
-    // La función tokenURI es heredada directamente de ERC721URIStorage.
-    // Se necesita sobreescribir supportsInterface para que el contrato anuncie que soporta ERC721URIStorage.
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721URIStorage) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721URIStorage) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
