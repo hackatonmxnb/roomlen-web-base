@@ -36,7 +36,7 @@
   }
 
   .btn-ghost {
-    @apply ring-1 ring-slate-200;
+    @apply ring-1 ring-slate-200 bg-white text-slate-700 hover:bg-slate-50;
   }
 
   .hicon {
