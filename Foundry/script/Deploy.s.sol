@@ -2,7 +2,6 @@
 pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
-import {wMXNB} from "../src/wMXNB.sol";
 import {VerifiableRentalAgreementNFT} from "../src/VerifiableRentalAgreementNFT.sol";
 import {TokenReciboRoomlen} from "../src/TokenReciboRoomlen.sol";
 import {LendingProtocol} from "../src/LendingProtocol.sol";
@@ -11,12 +10,13 @@ import {LendingProtocol} from "../src/LendingProtocol.sol";
  * @title Script de Despliegue para RoomLen
  * @notice Despliega y configura todos los contratos del protocolo RoomLen de manera secuencial y explícita.
  * @dev Lee la llave privada de una variable de entorno para determinar el desplegador y propietario inicial.
+ * @dev Lee la dirección de wMXNB de una variable de entorno para usar un token existente.
  */
 contract DeployContracts is Script {
 
     /**
      * @notice Punto de entrada principal del script que ejecuta todo el proceso de despliegue.
-     * @return wmxnbAddr La dirección del token wMXNB desplegado.
+     * @return wmxnbAddr La dirección del token wMXNB existente.
      * @return vraNftAddr La dirección del NFT de contratos de alquiler (VRA) desplegado.
      * @return trrNftAddr La dirección del NFT de recibos (TRR) desplegado.
      * @return protocolAddr La dirección del contrato LendingProtocol principal.
@@ -33,10 +33,12 @@ contract DeployContracts is Script {
         console.log("-----------------------------------------------------");
 
         // --- Fase 1: Despliegue de Contratos de Tokens y NFTs ---
-        console.log("Fase 1: Desplegando tokens y NFTs...");
+        console.log("Fase 1: Desplegando NFTs y obteniendo direccion de token existente...");
 
-        wMXNB wmxnb = new wMXNB(deployerAddress);
-        console.log("Contrato wMXNB (Token de pago) desplegado en:", address(wmxnb));
+        // Se lee la dirección del token wMXNB existente desde una variable de entorno.
+        address wmxnbAddress = vm.envAddress("WMXNB_ADDRESS");
+        require(wmxnbAddress != address(0), "La direccion de WMXNB_ADDRESS no puede ser cero.");
+        console.log("Usando wMXNB existente en:", wmxnbAddress);
 
         VerifiableRentalAgreementNFT rentalNft = new VerifiableRentalAgreementNFT(deployerAddress);
         console.log("Contrato VerifiableRentalAgreementNFT (Colateral) desplegado en:", address(rentalNft));
@@ -51,7 +53,7 @@ contract DeployContracts is Script {
 
         LendingProtocol lendingProtocol = new LendingProtocol(
             address(rentalNft),
-            address(wmxnb),
+            wmxnbAddress,
             address(trrNft),
             deployerAddress
         );
@@ -74,7 +76,7 @@ contract DeployContracts is Script {
         vm.stopBroadcast();
 
         // --- Fase 4: Devolución de Direcciones ---
-        wmxnbAddr = address(wmxnb);
+        wmxnbAddr = wmxnbAddress;
         vraNftAddr = address(rentalNft);
         trrNftAddr = address(trrNft);
         protocolAddr = address(lendingProtocol);
