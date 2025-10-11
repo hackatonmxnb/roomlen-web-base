@@ -10,7 +10,7 @@ const WalletConnect = () => {
     return (
       <div className="flex items-center gap-2">
         {!isPaseoNetwork && (
-            <div className="px-3 py-2 text-xs font-bold text-yellow-800 bg-yellow-100 rounded-xl">Red Incorrecta</div>
+            <div className="px-3 py-2 text-xs font-bold text-yellow-800 bg-yellow-100 rounded-xl">Wrong chain</div>
         )}
         {wMxnbBalance !== null && (
             <div className="px-3 py-2 text-sm font-semibold text-slate-700 bg-slate-100 rounded-xl">

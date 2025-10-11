@@ -1,14 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
 import { mxn, pct } from "@/lib/investor/utils";
 import type { Position, Offer } from "@/lib/investor/types";
+import { investmentApi } from "@/lib/api";
 
 interface DealDrawerProps {
   deal: Position | Offer;
   onClose: () => void;
+  onInvestmentSuccess?: () => void;
 }
 
-export function DealDrawer({ deal, onClose }: DealDrawerProps) {
+export function DealDrawer({ deal, onClose, onInvestmentSuccess }: DealDrawerProps) {
   const isOffer = "riskTier" in deal;
+  const [isInvesting, setIsInvesting] = useState(false);
+  const [investmentError, setInvestmentError] = useState<string | null>(null);
+  const [investmentSuccess, setInvestmentSuccess] = useState(false);
+
+  const handleFund = async () => {
+    if (!isOffer) return;
+
+    setIsInvesting(true);
+    setInvestmentError(null);
+
+    try {
+      // TODO: Replace with actual user ID from authentication
+      const userId = '550e8400-e29b-41d4-a716-446655440002';
+      
+      const response = await investmentApi.invest(userId, {
+        loan_application_id: deal.id,
+        investment_amount: deal.advance,
+      });
+
+      if (response.success) {
+        setInvestmentSuccess(true);
+        
+        // Trigger data refresh
+        if (onInvestmentSuccess) {
+          onInvestmentSuccess();
+        }
+        
+        // Wait 2 seconds and close
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } else {
+        setInvestmentError(response.message || 'Investment failed');
+      }
+    } catch (error) {
+      setInvestmentError(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsInvesting(false);
+    }
+  };
   
   return (
     <div className="fixed inset-0 z-50">
@@ -45,11 +87,11 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
                   <li>
                     OC/Haircut:{" "}
                     <b>
-                      {deal.ocPct}% / {deal.haircutPct}%
+                      {deal.ocPct.toFixed(2)} % / {deal.haircutPct.toFixed(2)} %
                     </b>
                   </li>
                   <li>
-                    Chain/Currency: <b>{deal.chain}</b> • <b>{deal.currency}</b>
+                    Currency: <b>{deal.currency}</b>
                   </li>
                 </>
               )}
@@ -89,18 +131,40 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
           </div>
         </div>
 
-        <div className="p-6 border-t border-slate-200 flex items-center justify-between">
-          <div className="text-sm text-slate-600">
-            Not an offer; informational preview only.
-          </div>
-          {isOffer ? (
-            <div className="flex gap-2">
-              <button className="btn">Simulate</button>
-              <button className="btn btn-primary">Fund now</button>
+        <div className="p-6 border-t border-slate-200">
+          {investmentError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+              <p className="font-semibold">Investment failed:</p>
+              <p>{investmentError}</p>
             </div>
-          ) : (
-            <div className="pill">Position detail</div>
           )}
+          
+          {investmentSuccess && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
+              <p className="font-semibold">✓ Investment successful!</p>
+              <p>Your investment has been processed.</p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-slate-600">
+              Not an offer; informational preview only.
+            </div>
+            {isOffer ? (
+              <div className="flex gap-2">
+                <button className="btn btn-outline">Simulate</button>
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleFund}
+                  disabled={isInvesting || investmentSuccess}
+                >
+                  {isInvesting ? 'Processing...' : investmentSuccess ? 'Invested ✓' : 'Fund now'}
+                </button>
+              </div>
+            ) : (
+              <div className="pill">Position detail</div>
+            )}
+          </div>
         </div>
       </div>
     </div>

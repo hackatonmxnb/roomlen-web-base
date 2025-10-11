@@ -27,7 +27,14 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold shadow-sm hover:shadow transition;
+    @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold shadow-sm hover:shadow-md transition;
+    background: var(--rf-blue);
+    color: white;
+  }
+
+  .btn:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    box-shadow: none;
   }
 
   .btn-primary {
@@ -35,8 +42,23 @@
     color: white;
   }
 
+  .btn-primary:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
   .btn-ghost {
     @apply ring-1 ring-slate-200 bg-white text-slate-700 hover:bg-slate-50;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold ring-1 transition;
+    color: var(--rf-blue);
+    border-color: transparent;
+    background: white;
   }
 
   .hicon {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-// Define los tipos de wallet soportados
+// Define supported wallet types
 export type WalletType = 'metamask' | 'subwallet';
 
 interface WalletModalProps {
@@ -11,7 +11,7 @@ interface WalletModalProps {
   onConnect: (wallet: WalletType) => void;
 }
 
-// Logos como componentes SVG para no depender de archivos externos
+// Logos as SVG components to avoid dependency on external files
 const MetaMaskLogo = () => (
   <svg width="48" height="48" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
     <path fill="#F6851B" d="M128 0l64 48v64l-64 48-64-48V48z"/>
@@ -47,10 +47,10 @@ export const WalletModal = ({ isOpen, onClose, onConnect }: WalletModalProps) =>
     >
       <div 
         className="relative w-full max-w-md p-8 bg-white rounded-3xl shadow-2xl"
-        onClick={(e) => e.stopPropagation()} // Evita que el clic en el modal lo cierre
+        onClick={(e) => e.stopPropagation()} // Prevents closing modal when clicking inside
       >
-        <h2 className="text-2xl font-bold text-center text-slate-900">Conectar Wallet</h2>
-        <p className="mt-2 text-center text-slate-600">Elige tu proveedor de wallet preferido.</p>
+        <h2 className="text-2xl font-bold text-center text-slate-900">Connect Wallet</h2>
+        <p className="mt-2 text-center text-slate-600">Choose your preferred wallet provider.</p>
         
         <div className="mt-6 space-y-4">
           <button

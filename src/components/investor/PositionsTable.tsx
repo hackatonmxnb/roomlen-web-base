@@ -12,20 +12,20 @@ export function PositionsTable({ positions, onOpen, onShowTRR }: PositionsTableP
   return (
     <section className="mt-6">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-xl font-bold">Tus Posiciones</h2>
+        <h2 className="text-xl font-bold">Your Positions</h2>
       </div>
       <div className="overflow-hidden rounded-2xl ring-1 ring-slate-200">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               {[
-                "Propiedad",
-                "Estado",
+                "Property",
+                "Status",
                 "Principal",
-                "Renta/mes",
-                "TIR est.",
-                "Próximo Pago",
-                "Activo Digital (TRR)",
+                "Rent/mo",
+                "IRR est.",
+                "Next Payment",
+                "Digital Asset (TRR)",
                 "",
               ].map((h) => (
                 <th key={h} className="px-4 py-3 text-left">
@@ -50,12 +50,12 @@ export function PositionsTable({ positions, onOpen, onShowTRR }: PositionsTableP
                 <td className="px-4 py-3">{p.nextPayment}</td>
                 <td className="px-4 py-3">
                   <button className="btn btn-sm btn-outline" onClick={() => onShowTRR(p)}>
-                    Ver TRR
+                    View TRR
                   </button>
                 </td>
                 <td className="px-4 py-3 text-right">
                   <button className="btn btn-ghost" onClick={() => onOpen(p)}>
-                    Detalles
+                    Details
                   </button>
                 </td>
               </tr>
@@ -69,8 +69,8 @@ export function PositionsTable({ positions, onOpen, onShowTRR }: PositionsTableP
 
 function StatusBadge({ status }: { status: "Active" | "Completed" | "Default" }) {
   const map = {
-    Active: { label: "Activo", cls: "bg-green-50 text-green-700 ring-green-200" },
-    Completed: { label: "Completado", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
+    Active: { label: "Active", cls: "bg-green-50 text-green-700 ring-green-200" },
+    Completed: { label: "Completed", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
     Default: { label: "Default", cls: "bg-red-50 text-red-700 ring-red-200" },
   };
   const s = map[status] || map.Active;

@@ -16,6 +16,7 @@ src/lib/api/
 
 ### 1. Usar el hook de React (Recomendado)
 
+**Marketplace:**
 ```typescript
 import { useMarketplace } from '@/hooks/useMarketplace';
 
@@ -35,15 +36,74 @@ function MyComponent() {
 }
 ```
 
+**Portfolio:**
+```typescript
+import { usePortfolio } from '@/hooks/usePortfolio';
+
+function MyComponent() {
+  const userId = '550e8400-e29b-41d4-a716-446655440002';
+  const { positions, portfolioSummary, isLoading, error } = usePortfolio(userId);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <div>
+      <p>Total Invested: ${portfolioSummary.totalInvested}</p>
+      {positions.map(position => (
+        <div key={position.id}>{position.property}</div>
+      ))}
+    </div>
+  );
+}
+```
+
 ### 2. Llamada directa al API
 
+**Marketplace:**
 ```typescript
 import { marketplaceApi } from '@/lib/api';
 
-async function fetchData() {
+async function fetchMarketplace() {
   try {
     const response = await marketplaceApi.getMarketplace();
     console.log(response);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+```
+
+**Portfolio:**
+```typescript
+import { portfolioApi } from '@/lib/api';
+
+async function fetchPortfolio() {
+  try {
+    const userId = '550e8400-e29b-41d4-a716-446655440002';
+    const response = await portfolioApi.getPortfolio(userId);
+    console.log(response);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+```
+
+**Investment:**
+```typescript
+import { investmentApi } from '@/lib/api';
+
+async function investInLoan() {
+  try {
+    const userId = '550e8400-e29b-41d4-a716-446655440002';
+    const response = await investmentApi.invest(userId, {
+      loan_application_id: '4',
+      investment_amount: 200000.00,
+    });
+    
+    if (response.success) {
+      console.log('Investment successful:', response);
+    }
   } catch (error) {
     console.error('Error:', error);
   }

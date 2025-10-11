@@ -55,15 +55,12 @@ export function useMarketplace(): UseMarketplaceResult {
 
     try {
       const response = await marketplaceApi.getMarketplace();
-      console.log('Raw API response:', response);
       
       // Transform loan applications to marketplace listings
       const listings = response.loan_applications.map(transformLoanApplication);
-      console.log('Transformed listings:', listings);
       
       setData(listings);
     } catch (err) {
-      console.error('Marketplace API error:', err);
       if (err instanceof ApiError) {
         setError(`Failed to fetch marketplace: ${err.message}`);
       } else if (err instanceof Error) {

@@ -100,7 +100,7 @@ function Hero(){
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a className="btn" href="#calc">Estimate your advance</a>
-            <a className="btn-outline ring-slate-300 hover:ring-slate-400" href="#how">See how it works</a>
+            <a className="btn-outline" href="#how">See how it works</a>
           </div>
         </div>
         <div className="relative">

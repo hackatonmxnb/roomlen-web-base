@@ -35,6 +35,7 @@ const formatDate = (timestamp: bigint) => {
 
 import { TRRInfoModal } from "@/components/investor/TRRInfoModal";
 import { useMarketplace } from "@/hooks/useMarketplace";
+import { usePortfolio } from "@/hooks/usePortfolio";
 
 type RiskTier = {
   scoreThreshold: number;
@@ -62,8 +63,18 @@ export default function InvestorDashboard() {
   const { 
     data: marketplaceListings, 
     isLoading: isLoadingMarketplace, 
-    error: marketplaceError 
+    error: marketplaceError,
+    refetch: refetchMarketplace
   } = useMarketplace();
+
+  // --- PORTFOLIO API DATA ---
+  const { 
+    positions: apiPositions,
+    portfolioSummary,
+    isLoading: isLoadingPortfolio,
+    error: portfolioError,
+    refetch: refetchPortfolio
+  } = usePortfolio('550e8400-e29b-41d4-a716-446655440002');
 
   useEffect(() => {
     const fetchContractData = async () => {
@@ -154,32 +165,48 @@ export default function InvestorDashboard() {
 
   // Merge blockchain offers with marketplace API data
   useEffect(() => {
-    console.log('Marketplace listings received:', marketplaceListings);
-    
-    if (marketplaceListings && marketplaceListings.length > 0) {
-      // Combine blockchain offers with API marketplace listings
-      // Get current blockchain offer IDs to avoid duplicates
-      setOffers(currentOffers => {
-        const blockchainIds = new Set(currentOffers.map(o => o.id));
-        const uniqueMarketplaceOffers = marketplaceListings
-          .filter(listing => !blockchainIds.has(listing.id))
-          .map(listing => ({
-            ...listing,
-            // Ensure all required Offer fields are present
-            property: listing.property || 'N/A',
-            location: listing.location || 'N/A',
-            chain: listing.chain || 'API',
-            currency: listing.currency || 'USD',
-            riskTier: listing.riskTier || 'N/A',
-          }));
+    // Always refresh the offers state with latest data
+    // Filter blockchain offers (those without 'API' chain) and merge with API data
+    setOffers(currentOffers => {
+      // Keep only blockchain offers (not from API)
+      const blockchainOffers = currentOffers.filter(o => o.chain !== 'API');
+      
+      // Add all API marketplace listings
+      const apiOffers = (marketplaceListings || []).map(listing => ({
+        ...listing,
+        property: listing.property || 'N/A',
+        location: listing.location || 'N/A',
+        chain: 'API',
+        currency: listing.currency || 'USD',
+        riskTier: listing.riskTier || 'N/A',
+      }));
 
-        console.log('Unique marketplace offers to add:', uniqueMarketplaceOffers);
-        
-        // Merge offers: blockchain first, then unique marketplace listings
-        return [...currentOffers, ...uniqueMarketplaceOffers];
-      });
-    }
+      // Merge: blockchain offers + API offers (API data always fresh)
+      return [...blockchainOffers, ...apiOffers];
+    });
   }, [marketplaceListings]);
+
+  // Merge blockchain positions with API portfolio data
+  useEffect(() => {
+    // Always refresh positions with latest data
+    // Filter blockchain positions and merge with API data
+    setPositions(currentPositions => {
+      // Keep only blockchain positions (filter out API ones by location marker)
+      const blockchainPositions = currentPositions.filter(p => 
+        p.location !== 'API Loan'
+      );
+      
+      // Add all API positions
+      const apiPositionsFormatted = (apiPositions || []).map(position => ({
+        ...position,
+        property: position.property || 'N/A',
+        location: position.location || 'N/A',
+      }));
+
+      // Merge: blockchain positions + API positions (API data always fresh)
+      return [...blockchainPositions, ...apiPositionsFormatted];
+    });
+  }, [apiPositions]);
 
   useEffect(() => {
     if (positions) {
@@ -190,8 +217,6 @@ export default function InvestorDashboard() {
   // --- END REAL-TIME BLOCKCHAIN DATA ---
 
   const filteredOffers = useMemo(() => {
-    console.log('All offers:', offers);
-    console.log('Filters:', { query, filters });
     
     const filtered = offers.filter((o: Offer) => {
       const q = query.toLowerCase();
@@ -207,7 +232,6 @@ export default function InvestorDashboard() {
       return matchQ && matchTier && matchTerm;
     });
     
-    console.log('Filtered offers:', filtered);
     return filtered;
   }, [offers, query, filters]);
 
@@ -218,6 +242,17 @@ export default function InvestorDashboard() {
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {tab === "portfolio" && (
           <>
+            {portfolioError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+                <p className="font-semibold">Error loading portfolio data:</p>
+                <p className="text-sm">{portfolioError}</p>
+              </div>
+            )}
+            {isLoadingPortfolio && positions.length === 0 && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-slate-600">Loading portfolio...</div>
+              </div>
+            )}
             <KPIBar portfolio={portfolio} />
             <CashflowStrip portfolio={portfolio} />
             <PositionsTable positions={positions} onOpen={setSelected} onShowTRR={setShowTRRModalFor} />
@@ -249,7 +284,14 @@ export default function InvestorDashboard() {
       </main>
 
       {selected && (
-        <DealDrawer deal={selected} onClose={() => setSelected(null)} />
+        <DealDrawer 
+          deal={selected} 
+          onClose={() => setSelected(null)}
+          onInvestmentSuccess={() => {
+            refetchMarketplace();
+            refetchPortfolio();
+          }}
+        />
       )}
 
       {showTRRModalFor && (

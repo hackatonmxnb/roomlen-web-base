@@ -41,8 +41,8 @@ export function OfferGrid({ offers, onOpen }: OfferGridProps) {
               <KV k="Term" v={`${o.termMonths}m`} />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <KV k="OC/Haircut" v={`${o.ocPct}% / ${o.haircutPct}%`} />
-              <KV k="Chain" v={`${o.chain} • ${o.currency}`} />
+              <KV k="OC/Haircut" v={`${o.ocPct.toFixed(2)} % / ${o.haircutPct.toFixed(2)} %`} />
+              <KV k="Currency" v={`${o.currency}`} />
             </div>
           </div>
 
