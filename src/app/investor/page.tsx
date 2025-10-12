@@ -58,6 +58,7 @@ const formatDate = (timestamp: bigint) => {
 import { TRRInfoModal } from "@/components/investor/TRRInfoModal";
 import { useMarketplace } from "@/hooks/useMarketplace";
 import { usePortfolio } from "@/hooks/usePortfolio";
+import { SecondaryMarketTab } from "@/components/investor/SecondaryMarket";
 
 type RiskTier = {
   scoreThreshold: number;
@@ -283,24 +284,76 @@ export default function InvestorDashboard() {
 
         {tab === "market" && (
           <>
-            <MarketFilters
-              query={query}
-              setQuery={setQuery}
-              filters={filters}
-              setFilters={setFilters}
-            />
-            {marketplaceError && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-                <p className="font-semibold">Error loading marketplace data:</p>
-                <p className="text-sm">{marketplaceError}</p>
+            {/* Header del Marketplace Unificado */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                🏪 RoomLen Marketplace
+              </h2>
+              <p className="text-slate-600">
+                Invest in new loans or trade existing positions for instant liquidity
+              </p>
+            </div>
+
+            {/* Bot de Liquidación Banner */}
+            <div className="mb-6 rounded-xl bg-gradient-to-r from-purple-50 to-blue-50 p-4 border border-purple-200">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🤖</span>
+                <div className="flex-1">
+                  <h4 className="font-bold text-slate-900">Automated Liquidation Bot Active</h4>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Our smart bot monitors all loans 24/7 and automatically liquidates defaulted positions to protect investors.
+                    Collateral is distributed fairly among TRR holders.
+                  </p>
+                </div>
               </div>
-            )}
-            {isLoadingMarketplace && offers.length === 0 && (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-slate-600">Loading marketplace...</div>
+            </div>
+
+            {/* Layout de 2 columnas: Primary + Secondary Market */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* COLUMNA IZQUIERDA: PRIMARY MARKET (Loans) */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-slate-900">
+                    💰 Primary Market
+                  </h3>
+                  <span className="text-sm text-slate-500">Fund new loans</span>
+                </div>
+
+                <MarketFilters
+                  query={query}
+                  setQuery={setQuery}
+                  filters={filters}
+                  setFilters={setFilters}
+                />
+
+                {marketplaceError && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+                    <p className="font-semibold">Error loading marketplace data:</p>
+                    <p className="text-sm">{marketplaceError}</p>
+                  </div>
+                )}
+
+                {isLoadingMarketplace && offers.length === 0 && (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-slate-600">Loading marketplace...</div>
+                  </div>
+                )}
+
+                <OfferGrid offers={filteredOffers} onOpen={setSelected} />
               </div>
-            )}
-            <OfferGrid offers={filteredOffers} onOpen={setSelected} />
+
+              {/* COLUMNA DERECHA: SECONDARY MARKET (TRR Tokens) */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-slate-900">
+                    💱 Secondary Market
+                  </h3>
+                  <span className="text-sm text-slate-500">Trade TRR tokens</span>
+                </div>
+
+                <SecondaryMarketTab />
+              </div>
+            </div>
           </>
         )}
       </main>

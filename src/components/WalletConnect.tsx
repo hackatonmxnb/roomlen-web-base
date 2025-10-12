@@ -34,13 +34,13 @@ const WalletConnect = () => {
         }]
       });
 
-      alert('¡Red Paseo agregada exitosamente! 🎉 Ahora conecta tu wallet.');
+      alert('Paseo Network added successfully! 🎉 Now connect your wallet.');
     } catch (error: any) {
       console.error('Error adding network:', error);
       if (error.code === 4902) {
-        alert('Red agregada. Por favor selecciona "Paseo Testnet" en tu wallet.');
+        alert('Network added. Please select "Paseo Testnet" in your wallet.');
       } else {
-        alert(`No se pudo agregar la red: ${error.message}`);
+        alert(`Could not add network: ${error.message}`);
       }
     } finally {
       setIsAddingNetwork(false);
@@ -54,14 +54,14 @@ const WalletConnect = () => {
           <div className="flex items-center gap-2">
             <div className="px-3 py-2 text-xs font-bold text-yellow-800 bg-yellow-100 rounded-xl flex items-center gap-2">
               <span>⚠️</span>
-              <span>Red Incorrecta</span>
+              <span>Wrong Network</span>
             </div>
             <button
               onClick={handleAddPaseoNetwork}
               disabled={isAddingNetwork}
               className="px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition disabled:opacity-50"
             >
-              {isAddingNetwork ? 'Agregando...' : 'Cambiar a Paseo'}
+              {isAddingNetwork ? 'Adding...' : 'Switch to Paseo'}
             </button>
           </div>
         )}
@@ -75,7 +75,7 @@ const WalletConnect = () => {
         </div>
         <button
           onClick={disconnectWallet}
-          title="Desconectar Wallet"
+          title="Disconnect Wallet"
           className="px-3 py-2 font-semibold text-slate-700 bg-slate-100 rounded-xl hover:bg-red-50 hover:text-red-600 transition-colors"
         >
           ✕
@@ -90,8 +90,8 @@ const WalletConnect = () => {
         onClick={connectWallet}
         className="inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold shadow-sm hover:shadow-lg transition-all bg-gradient-to-r from-green-600 to-blue-600 text-white hover:scale-105"
       >
-        <span className="mr-2">👛</span>
-        Conectar Billetera
+        <span className="mr-2"></span>
+        Connect Wallet
       </button>
       <WalletHelpButton onClick={() => setShowGuide(true)} />
 

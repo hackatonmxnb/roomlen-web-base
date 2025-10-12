@@ -26,16 +26,16 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
 
   const steps = [
     {
-      title: "¡Bienvenido a RoomLen!",
-      description: "Te vamos a guiar paso a paso para que conectes tu billetera digital. Es súper fácil, ¡solo sigue las instrucciones!",
+      title: "Welcome to RoomLen!",
+      description: "We'll guide you step by step to connect your digital wallet. It's super easy, just follow the instructions!",
       icon: "👋",
       iconType: "emoji",
       action: null,
       spotlight: true
     },
     {
-      title: "Instala MetaMask",
-      description: "MetaMask es la wallet más popular y segura. Es una extensión gratuita para tu navegador.",
+      title: "Install MetaMask",
+      description: "MetaMask is the most popular and secure wallet. It's a free browser extension.",
       icon: "/metammask_logo.png",
       iconType: "image",
       action: (
@@ -46,13 +46,13 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
           className="btn bg-orange-500 hover:bg-orange-600 text-white w-full flex items-center justify-center gap-2"
         >
           <img src="/metammask_logo.png" alt="MetaMask" className="h-5 w-auto" />
-          Descargar MetaMask →
+          Download MetaMask →
         </a>
       )
     },
     {
-      title: "Agrega la red Paseo",
-      description: "RoomLen funciona en la red Paseo de Polkadot. Es gratis y seguro. Haz click en el botón para agregar la red automáticamente.",
+      title: "Add Paseo Network",
+      description: "RoomLen runs on Polkadot's Paseo network. It's free and secure. Click the button to add the network automatically.",
       icon: "🌐",
       iconType: "emoji",
       action: (
@@ -60,7 +60,7 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
           onClick={async () => {
             try {
               if (!window.ethereum) {
-                alert('Por favor instala MetaMask primero');
+                alert('Please install MetaMask first');
                 return;
               }
 
@@ -79,22 +79,22 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
                 }]
               });
 
-              alert('¡Red agregada exitosamente! 🎉');
+              alert('Network added successfully! 🎉');
               setCurrentStep(currentStep + 1);
             } catch (error: any) {
               console.error('Error adding network:', error);
-              alert(`Error: ${error.message || 'No se pudo agregar la red'}`);
+              alert(`Error: ${error.message || 'Could not add the network'}`);
             }
           }}
           className="btn bg-blue-600 hover:bg-blue-700 text-white w-full"
         >
-          ✨ Agregar Red Paseo (1 click)
+          ✨ Add Paseo Network (1 click)
         </button>
       )
     },
     {
-      title: "Consigue tokens PAS gratis",
-      description: "Necesitas tokens PAS para pagar las transacciones. Son GRATIS y solo para pruebas. No tienen valor real.",
+      title: "Get Free PAS Tokens",
+      description: "You need PAS tokens to pay for transactions. They're FREE and only for testing. They have no real value.",
       icon: "💰",
       iconType: "emoji",
       action: (
@@ -105,19 +105,19 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
             rel="noopener noreferrer"
             className="btn bg-purple-600 hover:bg-purple-700 text-white w-full"
           >
-            Obtener PAS Gratis →
+            Get Free PAS →
           </a>
           <p className="text-xs text-slate-500 text-center">
-            1. Copia tu dirección de wallet<br />
-            2. Pégala en el faucet<br />
-            3. Espera 30 segundos ⏱️
+            1. Copy your wallet address<br />
+            2. Paste it in the faucet<br />
+            3. Wait 30 seconds ⏱️
           </p>
         </div>
       )
     },
     {
-      title: "¡Todo listo!",
-      description: "Ya tienes todo configurado. Ahora puedes conectar tu wallet y usar RoomLen sin problemas.",
+      title: "All Set!",
+      description: "You're all configured. Now you can connect your wallet and use RoomLen without any issues.",
       icon: "🎉",
       iconType: "emoji",
       action: (
@@ -125,7 +125,7 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
           onClick={onClose}
           className="btn bg-green-600 hover:bg-green-700 text-white w-full"
         >
-          Empezar a usar RoomLen →
+          Start Using RoomLen →
         </button>
       )
     }
@@ -253,11 +253,11 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
               disabled={currentStep === 0}
               className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
-              ← Anterior
+              ← Previous
             </button>
 
             <div className="text-xs font-semibold text-slate-500">
-              Paso {currentStep + 1} de {steps.length}
+              Step {currentStep + 1} of {steps.length}
             </div>
 
             {currentStep < steps.length - 1 ? (
@@ -268,14 +268,14 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
                 }}
                 className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
-                Siguiente →
+                Next →
               </button>
             ) : (
               <button
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
               >
-                ¡Listo! ✨
+                Done! ✨
               </button>
             )}
           </div>
@@ -291,14 +291,14 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
   );
 }
 
-// Componente para mostrar en el botón de wallet cuando no está conectado
+// Component to show on the wallet button when not connected
 export function WalletHelpButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       className="text-sm text-blue-600 hover:text-blue-700 underline"
     >
-      ¿Primera vez? Ver guía →
+      First time? View guide →
     </button>
   );
 }
