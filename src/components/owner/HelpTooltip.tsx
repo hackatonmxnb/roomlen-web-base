@@ -132,7 +132,7 @@ export function HelpTooltip({ term, explanation, example, blockchainIntegration 
   );
 }
 
-// Términos específicos para Owner Dashboard
+// Specific terms for Owner Dashboard
 export const OWNER_TERMS = {
   tokenize: {
     term: "Tokenize",

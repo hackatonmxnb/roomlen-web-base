@@ -152,7 +152,7 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
 
   return (
     <>
-      {/* Overlay oscuro con spotlight */}
+      {/* Dark overlay with spotlight */}
       <div className="fixed inset-0 z-[60]" style={{ pointerEvents: 'none' }}>
         <svg className="w-full h-full">
           <defs>
@@ -180,7 +180,7 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
         </svg>
       </div>
 
-      {/* Borde animado alrededor del spotlight */}
+      {/* Animated border around the spotlight */}
       {step.spotlight && spotlightPosition.width > 0 && (
         <div
           className="fixed z-[61] pointer-events-none"
@@ -195,13 +195,13 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
         </div>
       )}
 
-      {/* Card de la guía */}
+      {/* Guide card */}
       <div
         className="fixed z-[62] animate-fade-in"
         style={getCardPosition()}
       >
         <div className="bg-white rounded-2xl shadow-2xl border-2 border-blue-500 p-6 w-full">
-          {/* Flecha apuntando al botón (solo en paso 1) */}
+          {/* Arrow pointing to button (only in step 1) */}
           {currentStep === 0 && (
             <div className="absolute -top-3 left-8 w-6 h-6 bg-blue-500 transform rotate-45 border-t-2 border-l-2 border-blue-500"></div>
           )}
@@ -229,7 +229,7 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
             {step.action}
           </div>
 
-          {/* Indicadores de progreso */}
+          {/* Progress indicators */}
           <div className="flex gap-2 justify-center mb-4">
             {steps.map((_, index) => (
               <div
@@ -243,7 +243,7 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
             ))}
           </div>
 
-          {/* Navegación */}
+          {/* Navigation */}
           <div className="flex items-center justify-between">
             <button
               onClick={() => {
@@ -282,7 +282,7 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
         </div>
       </div>
 
-      {/* Click en overlay para cerrar */}
+      {/* Click on overlay to close */}
       <div
         className="fixed inset-0 z-[59]"
         onClick={onClose}

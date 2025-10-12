@@ -9,42 +9,42 @@ interface ErrorMessageProps {
   friendly?: boolean;
 }
 
-// Mapeo de errores técnicos a mensajes amigables
+// Mapping of technical errors to user-friendly messages
 const FRIENDLY_ERRORS: Record<string, { title: string; message: string; action?: string }> = {
   'user rejected': {
-    title: 'Transacción Cancelada',
-    message: 'Cancelaste la transacción en tu wallet. No te preocupes, tu dinero está seguro.',
-    action: 'Puedes intentar de nuevo cuando quieras'
+    title: 'Transaction Cancelled',
+    message: 'You cancelled the transaction in your wallet. Don\'t worry, your funds are safe.',
+    action: 'You can try again whenever you want'
   },
   'insufficient funds': {
-    title: 'Fondos Insuficientes',
-    message: 'No tienes suficientes tokens PAS para pagar esta transacción.',
-    action: 'Obtén tokens gratis del faucet de Polkadot'
+    title: 'Insufficient Funds',
+    message: 'You don\'t have enough PAS tokens to pay for this transaction.',
+    action: 'Get free tokens from the Polkadot faucet'
   },
   'network': {
-    title: 'Error de Conexión',
-    message: 'No pudimos conectar con la blockchain. Puede ser tu internet o la red está ocupada.',
-    action: 'Intenta de nuevo en unos segundos'
+    title: 'Connection Error',
+    message: 'We couldn\'t connect to the blockchain. It might be your internet or the network is busy.',
+    action: 'Try again in a few seconds'
   },
   'execution reverted': {
-    title: 'La Transacción Falló',
-    message: 'El contrato rechazó la transacción. Esto puede pasar si los datos son incorrectos o si alguien más ya usó esta propiedad.',
-    action: 'Revisa los datos e intenta nuevamente'
+    title: 'Transaction Failed',
+    message: 'The contract rejected the transaction. This can happen if the data is incorrect or if someone else already used this property.',
+    action: 'Review the data and try again'
   },
   'nonce': {
-    title: 'Error de Sincronización',
-    message: 'Tu wallet no está sincronizada con la red. Esto pasa cuando haces muchas transacciones rápido.',
-    action: 'Espera 10 segundos e intenta de nuevo'
+    title: 'Synchronization Error',
+    message: 'Your wallet is not synchronized with the network. This happens when you make many transactions quickly.',
+    action: 'Wait 10 seconds and try again'
   },
   'gas': {
-    title: 'Sin Gas para la Transacción',
-    message: 'Necesitas tokens PAS para pagar la transacción. Es como la gasolina para que funcione.',
-    action: 'Obtén PAS gratis del faucet'
+    title: 'Out of Gas',
+    message: 'You need PAS tokens to pay for the transaction. It\'s like gas to make it work.',
+    action: 'Get free PAS from the faucet'
   },
   'timeout': {
-    title: 'Transacción Lenta',
-    message: 'La red está tardando más de lo normal. Tu transacción puede estar procesándose todavía.',
-    action: 'Espera 1 minuto y revisa el explorador de bloques'
+    title: 'Slow Transaction',
+    message: 'The network is taking longer than normal. Your transaction might still be processing.',
+    action: 'Wait 1 minute and check the block explorer'
   }
 };
 
@@ -58,9 +58,9 @@ function getFriendlyError(error: string | Error): { title: string; message: stri
   }
 
   return {
-    title: 'Algo Salió Mal',
-    message: 'Ocurrió un error inesperado. No te preocupes, tu dinero está seguro.',
-    action: 'Intenta de nuevo o contáctanos si el problema persiste'
+    title: 'Something Went Wrong',
+    message: 'An unexpected error occurred. Don\'t worry, your funds are safe.',
+    action: 'Try again or contact us if the problem persists'
   };
 }
 
@@ -86,7 +86,7 @@ export function ErrorMessage({ error, title, onRetry, friendly = true }: ErrorMe
           {errorDetails?.action && (
             <div className="mt-3 p-3 bg-white rounded-lg border border-red-200">
               <p className="text-sm text-red-700">
-                <span className="font-semibold">💡 Qué hacer:</span> {errorDetails.action}
+                <span className="font-semibold">💡 What to do:</span> {errorDetails.action}
               </p>
             </div>
           )}
@@ -96,14 +96,14 @@ export function ErrorMessage({ error, title, onRetry, friendly = true }: ErrorMe
               onClick={onRetry}
               className="mt-4 btn bg-red-600 hover:bg-red-700 text-white"
             >
-              Intentar de Nuevo
+              Try Again
             </button>
           )}
 
           {!friendly && (
             <details className="mt-4">
               <summary className="text-xs text-red-600 cursor-pointer hover:text-red-700">
-                Ver detalles técnicos →
+                View technical details →
               </summary>
               <pre className="mt-2 p-3 bg-red-100 rounded-lg text-xs text-red-900 overflow-x-auto">
                 {errorMessage}

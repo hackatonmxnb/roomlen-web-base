@@ -6,13 +6,102 @@
 
 **Convert signed leases into instant capital on Polkadot**
 
-[![Live on Paseo](https://img.shields.io/badge/🚀_Live-Paseo_Testnet-E6007A?style=for-the-badge)](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4)
+[![Live Demo](https://img.shields.io/badge/🌐_LIVE_DEMO-Try_Now-00C7B7?style=for-the-badge&logo=netlify)](https://roomlen.netlify.app/)
+[![Live on Paseo](https://img.shields.io/badge/🚀_Blockchain-Paseo_Testnet-E6007A?style=for-the-badge)](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4)
 [![Tests Passing](https://img.shields.io/badge/✅_Tests-9/9_Passing-success?style=for-the-badge)](Foundry/test/)
 [![LATIN HACK](https://img.shields.io/badge/🏆-LATIN_HACK_2025-FFD700?style=for-the-badge)](.)
+
+<div align="center" style="background: linear-gradient(135deg, #00C7B7 0%, #1297C8 100%); padding: 20px; border-radius: 10px; margin: 20px 0;">
+
+### 🌐 **[→ TRY LIVE DEMO NOW ←](https://roomlen.netlify.app/)**
+**No installation needed • Connect wallet • Start testing in 2 minutes**
+
+</div>
 
 **Built from** 🇲🇽 **Mexico &** 🇧🇴 **Bolivia** | *"Live. Rent. Earn."*
 
 [🎬 Demo](#-quick-demo) • [💡 Features](#-key-features) • [🏗️ Architecture](#%EF%B8%8F-architecture) • [🧪 Test It](#-test-the-platform)
+
+</div>
+
+---
+
+## 🎯 Quick Start for Judges
+
+<div align="center">
+
+### 🌐 **LIVE APP:** [**roomlen.netlify.app**](https://roomlen.netlify.app/)
+
+### ⚡ **Network Used:** Paseo Testnet (Polkadot EVM)
+
+</div>
+
+### 📍 **Main Contract Address**
+```
+0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4
+```
+[**View on Block Explorer** →](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4)
+
+### 📄 **Contract ABI**
+Full ABI available at: [`LendingProtocol_ABI.json`](./LendingProtocol_ABI.json)
+
+<details>
+<summary><b>🔗 All Deployed Contracts</b></summary>
+
+| Contract | Address | ABI Location |
+|:---------|:--------|:-------------|
+| **LendingProtocol** | `0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4` | [`LendingProtocol_ABI.json`](./LendingProtocol_ABI.json) |
+| **RentalNFT** | `0x9a340Cd35537C05ec78b41064D99d15fb08e2b97` | [`src/lib/abi/VerifiableRentalAgreementNFT.json`](./src/lib/abi/VerifiableRentalAgreementNFT.json) |
+| **ReceiptNFT** | `0xC542E39374e63836B2307034E29cceE435A65545` | [`Foundry/out/TokenReciboRoomlen.sol/TokenReciboRoomlen.json`](./Foundry/out/TokenReciboRoomlen.sol/TokenReciboRoomlen.json) |
+| **wMXNB** | `0x7EF4558fe6E4c3Db239Bb763664A452F23955F3D` | [`src/lib/abi/WMXNB.json`](./src/lib/abi/WMXNB.json) |
+| **SecondaryMarket** | `0xb2dE3684E6A452f142FD87AbA0B2B190059c27d0` | [`src/lib/abi/TinyEscrow.json`](./src/lib/abi/TinyEscrow.json) |
+
+</details>
+
+### 🧪 **How to Test the Project**
+
+#### ⚡ Option A: Live Demo (FASTEST - 2 minutes)
+**👉 Just visit:** **[roomlen.netlify.app](https://roomlen.netlify.app/)** 👈
+
+Then:
+1. Click **"Connect Wallet"** → Add Paseo Network (automatic)
+2. Get free **PAS** tokens: [faucet.polkadot.io/paseo](https://faucet.polkadot.io/paseo)
+3. Get free **wMXNB** tokens (use faucet button on homepage)
+4. Test as **Owner** ([/owner](https://roomlen.netlify.app/owner)) or **Investor** ([/investor](https://roomlen.netlify.app/investor))
+
+#### Option B: Run Locally (5 minutes)
+```bash
+# Clone and run
+git clone https://github.com/hackatonmxnb/roomlen-web.git
+cd roomlen-web
+npm install
+npm run dev
+```
+Then open http://localhost:3000 and follow steps above
+
+#### Option C: Test Smart Contracts (2 minutes)
+```bash
+cd Foundry
+forge test -vvv
+```
+**Result:** ✅ 9/9 tests passing
+
+#### Option D: Direct Contract Calls
+```bash
+# Check total loans
+cast call 0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4 \
+  "getLoansCount()" \
+  --rpc-url https://testnet-passet-hub-eth-rpc.polkadot.io
+
+# View risk tiers
+cast call 0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4 \
+  "getRiskTiers()" \
+  --rpc-url https://testnet-passet-hub-eth-rpc.polkadot.io
+```
+
+<div align="center">
+
+### 🚀 **[→ OPEN LIVE APP NOW ←](https://roomlen.netlify.app/)**
 
 </div>
 
@@ -150,7 +239,29 @@ graph TB
 
 ## 🧪 Test the Platform
 
+<div align="center">
+
+## 🌐 **[TRY LIVE DEMO →](https://roomlen.netlify.app/)**
+
+**No installation • No setup • Just connect wallet**
+
+[![Open App](https://img.shields.io/badge/🚀_Open-Live_Application-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://roomlen.netlify.app/)
+
+</div>
+
 ### Option 1: Live Demo (Easiest) ⚡
+
+**Just visit:** **[roomlen.netlify.app](https://roomlen.netlify.app/)**
+
+**Then:**
+1. Connect wallet to **Paseo Testnet** ([Add to MetaMask](https://chainlist.org/?testnets=true&search=paseo))
+2. Get **PAS tokens** from [faucet](https://faucet.polkadot.io/paseo)
+3. Get **wMXNB tokens** (testnet currency) - use faucet on homepage
+4. **Test the flow:**
+   - 🏠 **Owner:** [/owner](https://roomlen.netlify.app/owner) → Tokenize → Get Advance
+   - 💼 **Investor:** [/investor](https://roomlen.netlify.app/investor) → Browse → Fund Loans
+
+### Option 2: Run Locally
 
 ```bash
 # 1. Clone & Install
@@ -161,17 +272,9 @@ npm install
 # 2. Run
 npm run dev
 ```
+Then open http://localhost:3000
 
-**Then:**
-1. Open http://localhost:3000
-2. Connect wallet to **Paseo Testnet** ([Add to MetaMask](https://chainlist.org/?testnets=true&search=paseo))
-3. Get **PAS tokens** from [faucet](https://faucet.polkadot.io/paseo)
-4. Get **wMXNB tokens** (testnet currency) - use faucet on homepage
-5. **Test the flow:**
-   - 🏠 **Owner:** `/owner` → Tokenize → Get Advance
-   - 💼 **Investor:** `/investor` → Browse → Fund Loans
-
-### Option 2: Direct Contract Interaction
+### Option 3: Direct Contract Interaction
 
 ```bash
 # View loans on-chain
@@ -185,7 +288,7 @@ cast call 0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4 \
   --rpc-url https://testnet-passet-hub-eth-rpc.polkadot.io
 ```
 
-### Option 3: Run Smart Contract Tests
+### Option 4: Run Smart Contract Tests
 
 ```bash
 cd Foundry
@@ -339,11 +442,10 @@ This is a **hackathon prototype** on testnet. **Not audited. Not for production.
 
 <div align="center">
 
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-roomlen.netlify.app-00C7B7?style=for-the-badge&logo=netlify)](https://roomlen.netlify.app/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/hackatonmxnb/roomlen-web)
 [![Explorer](https://img.shields.io/badge/Block_Explorer-Paseo-E6007A?style=for-the-badge&logo=polkadot)](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4)
 [![Faucet](https://img.shields.io/badge/Get_Testnet_Tokens-Faucet-blue?style=for-the-badge)](https://faucet.polkadot.io/paseo)
-
-[📧 Contact](mailto:contact@roomlen.io) • [🐦 Twitter](https://twitter.com/roomlen) • [💬 Discord](https://discord.gg/roomlen)
 
 </div>
 

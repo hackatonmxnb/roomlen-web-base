@@ -4,12 +4,12 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { ethers } from 'ethers';
 import { WalletModal, WalletType } from '@/components/WalletModal';
 
-// --- Información de Contratos y Red ---
+// --- Contract and Network Information ---
 const WMXNB_ADDRESS = '0xf8bB2Ce2643f89e6B80fDaC94483cDA91110d95a';
 const WMXNB_ABI = ['function balanceOf(address) view returns (uint256)'];
 const PASEO_NETWORK_ID = '420420422';
 
-// --- Definición del Estado del Contexto ---
+// --- Context State Definition ---
 interface WalletState {
   account: string | null;
   signer: ethers.Signer | null;
@@ -23,7 +23,7 @@ interface WalletState {
 
 const WalletContext = createContext<WalletState | undefined>(undefined);
 
-// --- Componente Proveedor ---
+// --- Provider Component ---
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [account, setAccount] = useState<string | null>(null);
   const [signer, setSigner] = useState<ethers.Signer | null>(null);
@@ -32,7 +32,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [wMxnbBalance, setWMxnbBalance] = useState<string | null>(null);
 
-  // --- Lógica de Balance ---
+  // --- Balance Logic ---
   const updateBalance = async (accountAddress: string, prov: ethers.BrowserProvider) => {
     try {
       const tokenContract = new ethers.Contract(WMXNB_ADDRESS, WMXNB_ABI, prov);
@@ -45,7 +45,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // --- Lógica de Conexión ---
+  // --- Connection Logic ---
   const resetState = () => {
     setAccount(null);
     setSigner(null);
@@ -92,7 +92,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // --- Manejo de Eventos de la Wallet ---
+  // --- Wallet Event Handling ---
   useEffect(() => {
     const provider = window.ethereum || window.SubWallet;
     if (!provider) return;
@@ -126,7 +126,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// --- Hook y Tipos Globales ---
+// --- Hook and Global Types ---
 export const useWallet = () => {
   const context = useContext(WalletContext);
   if (context === undefined) throw new Error('useWallet must be used within a WalletProvider');

@@ -6,7 +6,7 @@ import { lenderReceiptNftAddress, wmxnbAddress, escrowAddress } from '@/lib/cont
 import { ethers } from 'ethers';
 import TinyEscrowABI from '@/lib/abi/TinyEscrow.json';
 
-// ABIs necesarios
+// Required ABIs
 const ERC721_ABI = [
   'function approve(address to, uint256 tokenId) external',
   'function getApproved(uint256 tokenId) external view returns (address)',
@@ -18,7 +18,7 @@ const ERC20_ABI = [
   'function allowance(address owner, address spender) external view returns (uint256)',
 ];
 
-// Tipos para el mercado secundario
+// Types for secondary market
 interface TRRListing {
   id: string; // Listing ID from database
   tokenId: string;
@@ -54,7 +54,7 @@ export function SecondaryMarketTab() {
   const { account, isConnected } = useWallet();
 
   // TODO: Fetch real data from SecondaryMarket contract
-  // Por ahora usamos data de ejemplo
+  // For now we use sample data
   useEffect(() => {
     if (isConnected && account) {
       fetchMarketData();
@@ -64,13 +64,15 @@ export function SecondaryMarketTab() {
 
   const fetchMarketData = async () => {
     // TODO: Implement real blockchain fetch
-    // Ejemplo de datos mock
+    // Example mock data
     setListings([
       {
+        id: '1',
         tokenId: '1',
         seller: '0x1234...5678',
         askPrice: '42000',
         suggestedPrice: '40950',
+        timestamp: Date.now(),
         loanDetails: {
           property: 'Casa en Polanco',
           advance: '45000',
@@ -82,10 +84,12 @@ export function SecondaryMarketTab() {
         }
       },
       {
+        id: '3',
         tokenId: '3',
         seller: '0xabcd...efgh',
         askPrice: '28000',
         suggestedPrice: '27300',
+        timestamp: Date.now(),
         loanDetails: {
           property: 'Departamento en Condesa',
           advance: '30000',
@@ -124,10 +128,10 @@ export function SecondaryMarketTab() {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
 
-      // Convertir price a wei (asumiendo que price está en wMXNB enteros)
+      // Convert price to wei (assuming price is in whole wMXNB)
       const priceInWei = ethers.parseEther(price);
 
-      // Contratos
+      // Contracts
       const wmxnb = new ethers.Contract(wmxnbAddress, ERC20_ABI, signer);
       const escrow = new ethers.Contract(escrowAddress, TinyEscrowABI, signer);
 
@@ -174,8 +178,8 @@ export function SecondaryMarketTab() {
       await approveTx.wait();
       console.log('✅ NFT approved to escrow');
 
-      // Aquí deberías guardar el listing en tu base de datos
-      // Por ahora solo mostramos confirmación
+      // Here you should save the listing to your database
+      // For now we just show confirmation
       console.log('Step 2: Saving listing to database...');
       // TODO: await saveListingToDatabase(tokenId, account, price);
 

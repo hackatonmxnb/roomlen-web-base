@@ -3,7 +3,7 @@
 import React from "react";
 import dynamic from 'next/dynamic';
 
-// Importación dinámica para evitar problemas de renderizado en el lado del servidor
+// Dynamic import to avoid server-side rendering issues
 const WalletConnect = dynamic(
   () => import('@/components/WalletConnect'),
   { ssr: false }

@@ -52,14 +52,14 @@ export function WMXNBFaucet() {
       console.log('🔗 Creating contract instance...');
       const wmxnb = new ethers.Contract(wmxnbAddress, WMXNB_ABI, signer);
 
-      // Verificar que el contrato existe
+      // Verify that the contract exists
       const code = await provider.getCode(wmxnbAddress);
       console.log('Contract code length:', code.length);
       if (code === '0x') {
         throw new Error('❌ Contract not found at this address. The wMXNB contract may not be deployed on Paseo Testnet yet.');
       }
 
-      // Intentar leer el nombre y símbolo del token para verificar que es correcto
+      // Try to read the token name and symbol to verify it's correct
       try {
         const name = await wmxnb.name();
         const symbol = await wmxnb.symbol();
@@ -69,12 +69,12 @@ export function WMXNBFaucet() {
         console.warn('⚠️ Could not read token info, might not be an ERC20 token:', e);
       }
 
-      // Mintear 10,000 wMXNB (cantidad generosa para testnet)
+      // Mint 10,000 wMXNB (generous amount for testnet)
       const mintAmount = ethers.parseEther('10000');
       console.log('💰 Attempting to mint 10,000 wMXNB to:', account);
       console.log('Mint amount (wei):', mintAmount.toString());
 
-      // Intentar diferentes nombres de función de minteo
+      // Try different mint function names
       let tx;
       try {
         console.log('Trying mint(address, uint256)...');
@@ -82,7 +82,7 @@ export function WMXNBFaucet() {
       } catch (mintError: any) {
         console.error('mint() failed:', mintError.message);
 
-        // Intentar función alternativa: faucet()
+        // Try alternative function: faucet()
         console.log('Trying alternative: calling contract without specific function...');
         throw new Error('The mint() function does not exist or is not accessible. The contract may need to be redeployed with a public mint/faucet function.');
       }
@@ -92,16 +92,16 @@ export function WMXNBFaucet() {
       const receipt = await tx.wait();
       console.log('✅ Transaction confirmed in block:', receipt.blockNumber);
 
-      // Esperar un poco para que el balance se actualice en la blockchain
+      // Wait a bit for the balance to update on the blockchain
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Actualizar balance
+      // Update balance
       await fetchBalance();
 
       console.log('✅ wMXNB minted successfully!');
       alert('🎉 Success! You received 10,000 wMXNB\n\nYour balance will update automatically.');
 
-      // Disparar evento personalizado para que otros componentes actualicen
+      // Dispatch custom event for other components to update
       window.dispatchEvent(new CustomEvent('wmxnb-balance-changed'));
     } catch (error: any) {
       console.error('❌ Error minting wMXNB:', error);
@@ -158,7 +158,7 @@ export function WMXNBFaucet() {
   };
 
   if (!isConnected) {
-    return null; // No mostrar si no está conectado
+    return null; // Don't show if not connected
   }
 
   return (

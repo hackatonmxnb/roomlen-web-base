@@ -7,7 +7,7 @@ export default function RoomLenLanding() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWalletGuide, setShowWalletGuide] = useState(false);
 
-  // Mostrar modal de bienvenida solo la primera vez
+  // Show welcome modal only the first time
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem('roomlen_has_seen_welcome');
     if (!hasSeenWelcome) {
@@ -141,7 +141,7 @@ function Hero({ onShowWelcome }: { onShowWelcome: () => void }){
       <div className="absolute inset-0" style={{background:"linear-gradient(90deg,var(--rf-greenP),var(--rf-blueP))", opacity:.45}}/>
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-10 items-center">
         <div>
-          {/* Logo Badge con branding de RoomLen */}
+          {/* Logo Badge with RoomLen branding */}
           <div className="inline-flex items-center gap-3 px-5 py-3 bg-white/95 backdrop-blur rounded-2xl shadow-lg mb-6 border-2 border-white/50">
             <img
               src="/roomlenlogo.png"
@@ -265,7 +265,7 @@ function HowItWorks(){
   return (
     <section id="how" className="py-20 bg-gradient-to-b from-white to-slate-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header con logo */}
+        {/* Header with logo */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="h-1 w-12 rounded-full bg-gradient-to-r from-[#16A957] to-[#1297C8]"></div>
@@ -337,7 +337,7 @@ function DualTracks(){
 function TrackCard({title, highlights, accent, icon}:{title:string, highlights:string[], accent:string, icon:string}){
   return (
     <div className="group rounded-3xl ring-2 ring-slate-200 hover:ring-[#16A957] bg-white p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-      {/* Header con icono */}
+      {/* Header with icon */}
       <div className="flex items-center gap-4 mb-6">
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg"
@@ -578,7 +578,7 @@ function Footer(){
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Main footer content */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-          {/* Logo y branding */}
+          {/* Logo and branding */}
           <div className="flex items-center gap-4">
             <img src="/roomlenlogo.png" alt="RoomLen" className="h-12 w-auto" />
             <div>

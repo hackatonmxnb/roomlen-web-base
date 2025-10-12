@@ -124,7 +124,7 @@ export function InvestorHelpTooltip({ term, explanation, example, blockchainInte
   );
 }
 
-// Términos específicos para Investor Dashboard
+// Specific terms for Investor Dashboard
 export const INVESTOR_TERMS = {
   invested: {
     term: "Total Invested",
