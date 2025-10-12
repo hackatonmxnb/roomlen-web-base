@@ -22,9 +22,8 @@ export function DealDrawer({ deal, onClose, onInvestmentSuccess }: DealDrawerPro
     setInvestmentError(null);
 
     try {
-      // TODO: Replace with actual user ID from authentication
       const userId = '550e8400-e29b-41d4-a716-446655440002';
-      
+
       const response = await investmentApi.invest(userId, {
         loan_application_id: deal.id,
         investment_amount: deal.advance,

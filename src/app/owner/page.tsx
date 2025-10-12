@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useWallet } from '@/lib/WalletProvider';
 import WalletConnect from '@/components/WalletConnect';
+import { marketplaceApi } from '@/lib/api/roomfi';
 import VRA_NFT_ABI from '@/lib/abi/VerifiableRentalAgreementNFT.json';
 import LENDING_PROTOCOL_ABI from '@/lib/abi/LendingProtocol.json';
 import { lendingProtocolAddress, rentalNftAddress as VRA_NFT_ADDRESS } from '@/lib/contractAddresses';
@@ -20,7 +21,7 @@ interface Advance { id: string; amount: number; property: string; location: stri
 interface OwnerOffer { id: string; property: string; location: string; advance: number; irrAPR: number; termMonths: number; ocPct: number; haircutPct: number; fees: number; chain: string; riskTier: string; rent: number; }
 
 const MOCK_LEASES: Lease[] = [
-  { id: 'mock1', property: 'Loft Reforma 210', location: 'CDMX • Juárez', rent: 10000, status: 'Not Tokenized', termMonths: 12, onTimeRatio: 0.98, rentToIncome: 0.3, depositMonths: 2, docsQuality: 0.9, marketIndex: 1.1 },
+  { id: 'mock1', property: 'Loft Reforma 21000', location: 'CDMX • Juárez', rent: 10000, status: 'Not Tokenized', termMonths: 12, onTimeRatio: 0.98, rentToIncome: 0.3, depositMonths: 2, docsQuality: 0.9, marketIndex: 1.1 },
   { id: 'mock2', property: 'Depto Roma Nte 88', location: 'CDMX • Roma', rent: 8000, status: 'Not Tokenized', termMonths: 12, onTimeRatio: 0.92, rentToIncome: 0.4, depositMonths: 1, docsQuality: 0.7, marketIndex: 1.0 },
   { id: 'mock3', property: 'Casa Lomas 34', location: 'CDMX • Lomas', rent: 12000, status: 'Not Tokenized', termMonths: 18, onTimeRatio: 1.0, rentToIncome: 0.25, depositMonths: 2, docsQuality: 1.0, marketIndex: 1.2 },
 ];
@@ -647,6 +648,24 @@ export default function OwnerDashboardPage() {
 
             setLeases(prev => [newOnChainLease, ...prev]);
             setDemoLeases(prev => prev.filter(l => l.id !== tokenizedLease.id));
+            
+            // Create marketplace listing
+            try {
+                const listingResponse = await marketplaceApi.createListing(account, {
+                    property_id: nftId,
+                    requested_amount: tokenizedLease.rent * tokenizedLease.termMonths * 0.8, // 80% of total rent
+                    monthly_rent: tokenizedLease.rent,
+                    term_months: tokenizedLease.termMonths,
+                    purpose: "Property investment"
+                });
+                
+                if (listingResponse.success) {
+                    showToast("Property listed on marketplace!");
+                }
+            } catch (apiError: any) {
+                console.error("Failed to create marketplace listing:", apiError);
+                showToast("Warning: Tokenized but marketplace listing failed");
+            }
             
             closeTokenizePanel();
 
