@@ -8,7 +8,7 @@
 
 [![Live on Paseo](https://img.shields.io/badge/🚀_Live-Paseo_Testnet-E6007A?style=for-the-badge)](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4)
 [![Tests Passing](https://img.shields.io/badge/✅_Tests-9/9_Passing-success?style=for-the-badge)](Foundry/test/)
-[![LATIN HACK](https://img.shields.io/badge/🏆-LATIN_HACK_2025-FFD700?style=for-the-badge)](.)
+[![LATIN HACK](https://img.shields.io/badge/-LATIN_HACK_2025-FFD700?style=for-the-badge)](.)
 
 **Built from** 🇲🇽 **Mexico &** 🇧🇴 **Bolivia** | *"Live. Rent. Earn."*
 
@@ -335,12 +335,12 @@ This is a **hackathon prototype** on testnet. **Not audited. Not for production.
 
 <div align="center">
 
-### 🏆 LATIN HACK 2025 Submission
+### LATIN HACK 2025 Submission
 
 **RoomLen** - *Unlocking LATAM's $50B rental economy*
 
 **"Live. Rent. Earn."**
 
-Made with ❤️ from 🇲🇽 🇧🇴
+Made with from 🇲🇽 🇧🇴
 
 </div>
