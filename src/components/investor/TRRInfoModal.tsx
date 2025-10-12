@@ -9,7 +9,8 @@ interface TRRInfoModalProps {
 }
 
 export const TRRInfoModal = ({ position, onClose }: TRRInfoModalProps) => {
-  const openseaUrl = `https://testnets.opensea.io/assets/moonbase/${lenderReceiptNftAddress}/${position.id}`;
+  const kodadotUrl = `https://kodadot.xyz/paseo/gallery/${lenderReceiptNftAddress}-${position.id}`;
+  const explorerUrl = `https://blockscout-passet-hub.parity-testnet.parity.io/token/${lenderReceiptNftAddress}/instance/${position.id}`;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center" onClick={onClose}>
@@ -20,20 +21,28 @@ export const TRRInfoModal = ({ position, onClose }: TRRInfoModalProps) => {
 
         <h3 className="text-xl font-semibold text-slate-900">Your Digital Asset: TRR Token</h3>
         <p className="mt-2 text-sm text-slate-600">
-          This is an NFT (Non-Fungible Token) that represents your investment in the loan for the property <strong>{position.property}</strong>. 
-          It's a unique digital asset that you can transfer, sell, or use on other DeFi platforms.
+          This is an NFT (Non-Fungible Token) that represents your investment in the loan for the property <strong>{position.property}</strong>.
+          It's a unique digital asset that you can transfer, sell, or use on other DeFi platforms within the Polkadot ecosystem.
         </p>
 
         <div className="mt-6">
           <h4 className="font-semibold text-slate-800">What can you do with your TRR?</h4>
           <div className="mt-4 space-y-4">
-            <a 
-              href={openseaUrl}
+            <a
+              href={kodadotUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full text-center px-4 py-3 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-semibold transition-colors"
             >
-              Sell on OpenSea
+              Sell on Kodadot
+            </a>
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center px-4 py-3 bg-slate-600 text-white rounded-md hover:bg-slate-700 font-semibold transition-colors"
+            >
+              View on Explorer
             </a>
             <a 
               href="#" 

@@ -8,6 +8,7 @@ import { marketplaceApi } from '@/lib/api/roomfi';
 import VRA_NFT_ABI from '@/lib/abi/VerifiableRentalAgreementNFT.json';
 import LENDING_PROTOCOL_ABI from '@/lib/abi/LendingProtocol.json';
 import { lendingProtocolAddress, rentalNftAddress as VRA_NFT_ADDRESS } from '@/lib/contractAddresses';
+import { HelpTooltip, OWNER_TERMS } from '@/components/owner/HelpTooltip';
 
 type TLeaseStatus = 'Not Tokenized' | 'Tokenized' | 'Escrow Active';
 interface Lease {
@@ -27,11 +28,24 @@ const MOCK_LEASES: Lease[] = [
 ];
 
 const Header = () => (
-    <header className="bg-white ring-1 ring-slate-200 sticky top-0 z-30">
+    <header className="bg-gradient-to-r from-white to-slate-50 ring-1 ring-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-            <a href="/" className="flex items-center gap-3 hover:opacity-80 transition"><img src="/roomlenlogo.png" alt="RoomLen Logo" className="h-14 w-auto" /></a>
+            <a href="/" className="flex items-center gap-3 hover:opacity-80 transition">
+                <img src="/roomlenlogo.png" alt="RoomLen Logo" className="h-14 w-auto" />
+            </a>
             <div className="flex items-center gap-4">
-                <div className="text-right hidden sm:block"><div className="font-bold text-slate-800">Owner</div><div className="text-xs text-slate-500">KYC ✓ • Payout: CLABE ****1234</div></div>
+                {/* Polkadot Badge */}
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg ring-1 ring-slate-200">
+                    <img src="/polkadot_logo.png" alt="Polkadot" className="h-5 w-auto" />
+                    <span className="text-xs font-semibold text-slate-700">Paseo Testnet</span>
+                </div>
+                <div className="text-right hidden sm:block">
+                    <div className="font-bold text-slate-800 flex items-center gap-2">
+                        Owner Dashboard
+                        <span className="text-green-600 text-xl">🏠</span>
+                    </div>
+                    <div className="text-xs text-slate-500">Live. Rent. Earn.</div>
+                </div>
                 <WalletConnect />
             </div>
         </div>
@@ -114,21 +128,68 @@ const PropertiesCard = ({ leases, onGetAdvance }: { leases: Lease[], onGetAdvanc
 );
 
 const DemoPropertiesCard = ({ leases, onTokenize }: { leases: Lease[], onTokenize: (lease: Lease) => void }) => (
-    <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 border-2 border-dashed border-blue-300">
-        <div className="flex items-center justify-between">
-            <div className="font-semibold text-blue-800">Demo Properties</div>
-            <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-blue-200 bg-blue-50 text-blue-700">For Hackathon Demo</span>
+    <section className="rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 p-6 shadow-lg ring-2 ring-blue-200 border-2 border-dashed border-blue-300">
+        <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+                <span className="font-bold text-blue-900 text-lg">Demo Properties</span>
+                <HelpTooltip {...OWNER_TERMS.tokenize} />
+            </div>
+            <span className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ring-2 ring-blue-300 bg-blue-100 text-blue-800 shadow-sm">
+                🎯 Hackathon Demo
+            </span>
         </div>
-        <p className="text-sm text-slate-600 mt-2">These are sample properties. Use the 'Tokenize' button to create a verifiable NFT on the blockchain and enable advances.</p>
-        <div className="mt-4 divide-y divide-slate-100">
+
+        {/* Info Box */}
+        <div className="mb-4 p-4 bg-white rounded-xl border-2 border-blue-200 shadow-sm">
+            <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-[#16A957] to-[#1297C8] flex items-center justify-center text-white text-xl">
+                    📄
+                </div>
+                <div className="flex-1">
+                    <div className="font-semibold text-slate-900 mb-1 flex items-center gap-2">
+                        What is Tokenization?
+                        <HelpTooltip {...OWNER_TERMS.nft} />
+                    </div>
+                    <p className="text-sm text-slate-700 leading-relaxed">
+                        Click <strong>"Tokenize"</strong> to convert your rental contract into a digital NFT on <strong>Polkadot blockchain</strong>.
+                        This enables you to request cash advances!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div className="space-y-3">
             {leases.map(lease => (
-                <div key={lease.id} className="py-3 flex items-center justify-between gap-3">
-                    <div><div className="font-medium">{lease.property}</div><div className="text-slate-600 text-sm">{lease.location} • Rent ${lease.rent.toLocaleString()} / mo</div></div>
-                    <div className="flex items-center gap-2">
-                        <button onClick={() => onTokenize(lease)} className="btn-sm bg-blue-600 text-white">Tokenize</button>
+                <div key={lease.id} className="p-4 bg-white rounded-xl ring-2 ring-slate-200 hover:ring-[#16A957] transition-all hover:shadow-md">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex-1">
+                            <div className="font-semibold text-slate-900">{lease.property}</div>
+                            <div className="text-slate-600 text-sm mt-1 flex items-center gap-2">
+                                <span>{lease.location}</span>
+                                <span className="text-slate-400">•</span>
+                                <span className="font-semibold text-green-600">${lease.rent.toLocaleString()}/mo</span>
+                                <span className="text-slate-400">•</span>
+                                <span>{lease.termMonths} months</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => onTokenize(lease)}
+                            className="px-4 py-2 bg-gradient-to-r from-[#16A957] to-[#1297C8] text-white font-semibold rounded-xl hover:shadow-lg transition-all hover:scale-105 flex items-center gap-2"
+                        >
+                            <span>🎫</span> Tokenize
+                        </button>
                     </div>
                 </div>
             ))}
+        </div>
+
+        {/* Blockchain Info */}
+        <div className="mt-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+            <div className="flex items-center gap-2 text-sm">
+                <img src="/polkadot_logo.png" alt="Polkadot" className="h-4 w-auto" />
+                <span className="font-semibold text-purple-900">On-chain on Polkadot Paseo Testnet</span>
+                <HelpTooltip {...OWNER_TERMS.paseo} />
+            </div>
         </div>
     </section>
 );

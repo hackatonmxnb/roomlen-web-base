@@ -10,9 +10,9 @@ import VRA_NFT_ABI from '@/lib/abi/VerifiableRentalAgreementNFT.json';
 import LENDING_PROTOCOL_ABI from '@/lib/abi/LendingProtocol.json';
 import { lendingProtocolAddress, rentalNftAddress } from '@/lib/contractAddresses';
 
-// IMPORTANT: This page is for testing purposes only on Moonbase Alpha testnet
-// Network ID: 1287
-// Native Token: DEV (no real value)
+// IMPORTANT: This page is for testing purposes only on Paseo Testnet
+// Network ID: 420420422
+// Native Token: PAS (no real value)
 
 export default function TestPage() {
   const { isConnected, account, provider, signer } = useWallet();
@@ -53,9 +53,9 @@ export default function TestPage() {
           const network = await provider.getNetwork();
           const chainId = Number(network.chainId);
 
-          // Moonbase Alpha chainId is 1287
-          if (chainId === 1287) {
-            setNetworkName('Moonbase Alpha (Testnet)');
+          // Paseo Testnet chainId is 420420422
+          if (chainId === 420420422) {
+            setNetworkName('Paseo Testnet (Polkadot Asset Hub)');
             setIsCorrectNetwork(true);
           } else {
             setNetworkName(`Wrong Network (Chain ID: ${chainId})`);
@@ -210,7 +210,7 @@ export default function TestPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-slate-900">RoomLen Test Interface</h1>
-              <p className="text-sm text-slate-600 mt-1">Direct Smart Contract Interaction - Moonbase Alpha Testnet</p>
+              <p className="text-sm text-slate-600 mt-1">Direct Smart Contract Interaction - Paseo Testnet</p>
             </div>
             <WalletConnect />
           </div>
@@ -226,8 +226,8 @@ export default function TestPage() {
             <div>
               <h3 className="font-semibold text-yellow-900">Testnet Only - No Real Value</h3>
               <p className="text-sm text-yellow-800 mt-1">
-                This interface interacts with smart contracts deployed on <strong>Moonbase Alpha testnet</strong>.
-                DEV tokens have no real monetary value. This is for demonstration and testing purposes only.
+                This interface interacts with smart contracts deployed on <strong>Paseo Testnet (Polkadot Asset Hub)</strong>.
+                PAS tokens have no real monetary value. This is for demonstration and testing purposes only.
               </p>
             </div>
           </div>
@@ -238,7 +238,7 @@ export default function TestPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
             <div className="text-6xl mb-4">🔌</div>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Connect Your Wallet</h2>
-            <p className="text-slate-600 mb-6">Connect to Moonbase Alpha testnet to interact with smart contracts</p>
+            <p className="text-slate-600 mb-6">Connect to Paseo Testnet to interact with smart contracts</p>
             <WalletConnect />
           </div>
         ) : (
@@ -265,7 +265,7 @@ export default function TestPage() {
 
               {!isCorrectNetwork && (
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
-                  <strong>Wrong Network!</strong> Please switch to Moonbase Alpha testnet (Chain ID: 1287)
+                  <strong>Wrong Network!</strong> Please switch to Paseo Testnet (Chain ID: 420420422)
                 </div>
               )}
             </div>
@@ -496,7 +496,7 @@ export default function TestPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-6 mt-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-600">
-          <p>RoomLen Test Interface - Hackathon Demo - Moonbase Alpha Testnet Only</p>
+          <p>RoomLen Test Interface - Hackathon Demo - Paseo Testnet Only</p>
           <p className="mt-1 text-xs">This page is not indexed by search engines and is for testing purposes only.</p>
         </div>
       </footer>

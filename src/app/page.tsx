@@ -1,13 +1,31 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import { WelcomeModal } from "@/components/ui/WelcomeModal";
 
 export default function RoomLenLanding() {
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showWalletGuide, setShowWalletGuide] = useState(false);
+
+  // Mostrar modal de bienvenida solo la primera vez
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('roomlen_has_seen_welcome');
+    if (!hasSeenWelcome) {
+      setShowWelcome(true);
+      localStorage.setItem('roomlen_has_seen_welcome', 'true');
+    }
+  }, []);
+
+  const handleStartTour = () => {
+    setShowWelcome(false);
+    setShowWalletGuide(true);
+  };
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <BrandTokens />
-      <TopBar />
-      <Hero />
+      <TopBar onShowWelcome={() => setShowWelcome(true)} />
+      <Hero onShowWelcome={() => setShowWelcome(true)} />
       <TrustStrip />
       <HowItWorks />
       <DualTracks />
@@ -16,6 +34,13 @@ export default function RoomLenLanding() {
       <FAQ />
       <CTA />
       <Footer />
+
+      {showWelcome && (
+        <WelcomeModal
+          onClose={() => setShowWelcome(false)}
+          onStartTour={handleStartTour}
+        />
+      )}
     </div>
   );
 }
@@ -72,7 +97,7 @@ import { useWallet } from "@/lib/WalletProvider";
 import Link from "next/link";
 import WalletConnect from "@/components/WalletConnect";
 
-function TopBar(){
+function TopBar({ onShowWelcome }: { onShowWelcome: () => void }){
   const { isConnected } = useWallet();
 
   return (
@@ -80,9 +105,9 @@ function TopBar(){
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <a href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <img 
-              src="/roomlenlogo.png" 
-              alt="RoomLen Logo" 
+            <img
+              src="/roomlenlogo.png"
+              alt="RoomLen Logo"
               className="h-14 w-auto"
             />
           </a>
@@ -92,12 +117,15 @@ function TopBar(){
           <a href="#calc" className="text-slate-600 hover:text-slate-900">Calculator</a>
           <a href="#safety" className="text-slate-600 hover:text-slate-900">Safety</a>
           <a href="#faq" className="text-slate-600 hover:text-slate-900">FAQ</a>
+          <button onClick={onShowWelcome} className="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1">
+            <span>ℹ️</span> First time?
+          </button>
         </nav>
         <div className="flex items-center gap-3">
           {isConnected && (
             <>
-              <Link className="btn-outline ring-slate-300 hover:ring-slate-400 hidden sm:inline-flex" href="/owner">Owner</Link>
-              <Link className="btn hidden sm:inline-flex" style={{background:"var(--rf-blue)"}} href="/investor">Investor</Link>
+              <Link className="btn-outline ring-slate-300 hover:ring-slate-400 hidden sm:inline-flex" href="/owner">I'm an Owner</Link>
+              <Link className="btn hidden sm:inline-flex" style={{background:"var(--rf-blue)"}} href="/investor">I want to Invest</Link>
             </>
           )}
           <WalletConnect />
@@ -107,21 +135,65 @@ function TopBar(){
   );
 }
 
-function Hero(){
+function Hero({ onShowWelcome }: { onShowWelcome: () => void }){
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0" style={{background:"linear-gradient(90deg,var(--rf-greenP),var(--rf-blueP))", opacity:.45}}/>
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-10 items-center">
         <div>
+          {/* Logo Badge con branding de RoomLen */}
+          <div className="inline-flex items-center gap-3 px-5 py-3 bg-white/95 backdrop-blur rounded-2xl shadow-lg mb-6 border-2 border-white/50">
+            <img
+              src="/roomlenlogo.png"
+              alt="RoomLen"
+              className="h-8 w-auto"
+            />
+            <div className="h-6 w-px bg-gradient-to-b from-[#16A957] to-[#1297C8]"></div>
+            <span className="text-sm font-bold bg-gradient-to-r from-[#16A957] to-[#1297C8] bg-clip-text text-transparent">
+              Live. Rent. Earn.
+            </span>
+          </div>
+
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight text-slate-900">
-            Rent‑backed advances for property owners
+            Get <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">up to 90%</span> of your future rent TODAY
           </h1>
-          <p className="mt-5 text-lg text-slate-700">
-            Convert a signed lease into upfront capital today. Investors receive monthly rent streams via on‑chain escrow. Over‑collateralized, transparent, fraud‑aware.
+          <p className="mt-5 text-lg text-slate-700 leading-relaxed">
+            Have a signed rental contract? Turn those monthly payments into <strong>immediate cash</strong>.
+            No banks. No waiting. No complicated paperwork.
           </p>
+
+          <div className="mt-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">💰</span>
+              <div>
+                <div className="font-bold text-green-900 text-lg">Real example:</div>
+                <div className="text-green-800 mt-1">
+                  Rent of <strong>$10,000/month × 12 months</strong> = Get up to <strong className="text-xl">$92,000 MXN today</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-8 flex flex-wrap gap-3">
-            <a className="btn" href="#calc">Estimate your advance</a>
-            <a className="btn-outline" href="#how">See how it works</a>
+            <a className="btn" href="#calc">Calculate my advance →</a>
+            <button onClick={onShowWelcome} className="btn-outline flex items-center gap-2">
+              <span>ℹ️</span> How does it work?
+            </button>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-600">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+              </svg>
+              <span>No bank procedures</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+              </svg>
+              <span>100% secure & transparent</span>
+            </div>
           </div>
         </div>
         <div className="relative">
@@ -160,22 +232,24 @@ function KPI({label, value, emphasized}:{label:string, value:string, emphasized?
 
 function TrustStrip(){
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-      <div className="grid sm:grid-cols-3 gap-3">
-        <TrustItem title="On‑chain escrow" desc="Transparent flows" icon="🔗"/>
-        <TrustItem title="Over‑collateralized" desc="Risk‑aware pricing" icon="🛡️"/>
-        <TrustItem title="KYC & docs" desc="Fraud‑aware onboarding" icon="🧾"/>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      <div className="grid sm:grid-cols-3 gap-4">
+        <TrustItem title="On‑chain escrow" desc="Transparent flows" icon="🔗" gradient="from-green-500 to-emerald-600"/>
+        <TrustItem title="Over‑collateralized" desc="Risk‑aware pricing" icon="🛡️" gradient="from-blue-500 to-cyan-600"/>
+        <TrustItem title="KYC & docs" desc="Fraud‑aware onboarding" icon="🧾" gradient="from-teal-500 to-green-600"/>
       </div>
     </div>
   );
 }
-function TrustItem({title, desc, icon}:{title:string, desc:string, icon:string}){
+function TrustItem({title, desc, icon, gradient}:{title:string, desc:string, icon:string, gradient:string}){
   return (
-    <div className="rounded-2xl ring-1 ring-slate-200 bg-white p-5 flex items-center gap-4">
-      <div className="text-2xl">{icon}</div>
+    <div className="group rounded-2xl ring-2 ring-slate-200 hover:ring-[#16A957] bg-white p-6 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+      <div className={`flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-2xl shadow-md`}>
+        {icon}
+      </div>
       <div>
-        <div className="font-semibold">{title}</div>
-        <div className="text-sm text-slate-600">{desc}</div>
+        <div className="font-bold text-slate-900">{title}</div>
+        <div className="text-sm text-slate-600 mt-1">{desc}</div>
       </div>
     </div>
   );
@@ -183,24 +257,42 @@ function TrustItem({title, desc, icon}:{title:string, desc:string, icon:string})
 
 function HowItWorks(){
   const steps = [
-    {title:"Tokenize the lease", desc:"Create a LeaseNFT with key terms + signed docs hash.", icon:"📝"},
-    {title:"Fund the deal", desc:"An investor provides the advance. Claim rights are issued.", icon:"💸"},
-    {title:"Stream the rent", desc:"Monthly rent flows to the investor via escrow.", icon:"🌊"},
-    {title:"Settle & close", desc:"At term end, guarantees are released and NFTs are burned.", icon:"✅"},
+    {title:"Tokenize the lease", desc:"Create a LeaseNFT with key terms + signed docs hash.", icon:"📝", color: "from-green-400 to-emerald-500"},
+    {title:"Fund the deal", desc:"An investor provides the advance. Claim rights are issued.", icon:"💸", color: "from-blue-400 to-cyan-500"},
+    {title:"Stream the rent", desc:"Monthly rent flows to the investor via escrow.", icon:"🌊", color: "from-teal-400 to-green-500"},
+    {title:"Settle & close", desc:"At term end, guarantees are released and NFTs are burned.", icon:"✅", color: "from-emerald-500 to-green-600"},
   ];
   return (
-    <section id="how" className="py-16 bg-[var(--rf-snow)]">
+    <section id="how" className="py-20 bg-gradient-to-b from-white to-slate-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-extrabold tracking-tight">How RoomLen works</h2>
-        <p className="mt-2 text-slate-600 max-w-2xl">
-          Start P2P (one deal ↔ one investor), then graduate to a diversified pool.
-        </p>
+        {/* Header con logo */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="h-1 w-12 rounded-full bg-gradient-to-r from-[#16A957] to-[#1297C8]"></div>
+            <img src="/roomlenlogo.png" alt="RoomLen" className="h-8 w-auto" />
+            <div className="h-1 w-12 rounded-full bg-gradient-to-r from-[#1297C8] to-[#16A957]"></div>
+          </div>
+          <h2 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-[#16A957] to-[#1297C8] bg-clip-text text-transparent">
+            How RoomLen works
+          </h2>
+          <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">
+            Start P2P (one deal ↔ one investor), then graduate to a diversified pool.
+          </p>
+        </div>
+
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((s,i)=> (
-            <div key={i} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
-              <div className="text-2xl">{s.icon}</div>
-              <div className="mt-3 font-semibold">{s.title}</div>
-              <div className="mt-1 text-sm text-slate-600">{s.desc}</div>
+            <div key={i} className="group rounded-3xl bg-white p-6 ring-2 ring-slate-200 hover:ring-[#16A957] transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${s.color} text-3xl shadow-lg mb-4`}>
+                {s.icon}
+              </div>
+              <div className="mt-3 font-bold text-lg text-slate-900">{s.title}</div>
+              <div className="mt-2 text-sm text-slate-600 leading-relaxed">{s.desc}</div>
+
+              {/* Step number */}
+              <div className="mt-4 inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-[#16A957] to-[#1297C8] text-white font-bold text-sm">
+                {i + 1}
+              </div>
             </div>
           ))}
         </div>
@@ -211,18 +303,30 @@ function HowItWorks(){
 
 function DualTracks(){
   return (
-    <section className="py-16">
+    <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-[#16A957] to-[#1297C8] bg-clip-text text-transparent">
+            Choose your path
+          </h2>
+          <p className="mt-3 text-lg text-slate-600">
+            Whether you own property or want to invest, RoomLen has you covered
+          </p>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-8">
           <TrackCard
             title="For owners"
             highlights={["Upfront advance against rent","Keep tenants in place","Simple docs & onboarding","Transparent servicing fees"]}
-            accent="var(--rf-green)"
+            accent="#16A957"
+            icon="🏠"
           />
           <TrackCard
             title="For investors"
             highlights={["Monthly rent streams","Risk tiers (OC / haircut)","Deal transparency on‑chain","Pool coming soon"]}
-            accent="var(--rf-blue)"
+            accent="#1297C8"
+            icon="📈"
           />
         </div>
       </div>
@@ -230,19 +334,47 @@ function DualTracks(){
   );
 }
 
-function TrackCard({title, highlights, accent}:{title:string, highlights:string[], accent:string}){
+function TrackCard({title, highlights, accent, icon}:{title:string, highlights:string[], accent:string, icon:string}){
   return (
-    <div className="rounded-3xl ring-1 ring-slate-200 bg-white p-7 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className="h-2 w-10 rounded-full" style={{background:accent}} />
-        <h3 className="text-xl font-bold">{title}</h3>
+    <div className="group rounded-3xl ring-2 ring-slate-200 hover:ring-[#16A957] bg-white p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+      {/* Header con icono */}
+      <div className="flex items-center gap-4 mb-6">
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg"
+          style={{background: `linear-gradient(135deg, ${accent}, ${accent}dd)`}}
+        >
+          {icon}
+        </div>
+        <div>
+          <h3 className="text-2xl font-bold text-slate-900">{title}</h3>
+          <div className="h-1 w-16 rounded-full mt-2" style={{background:accent}} />
+        </div>
       </div>
-      <ul className="mt-4 space-y-2 text-slate-700 list-disc list-inside">
-        {highlights.map((h,i)=> <li key={i}>{h}</li>)}
+
+      {/* Features list */}
+      <ul className="space-y-3 mb-8">
+        {highlights.map((h,i)=> (
+          <li key={i} className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md" style={{background:accent}}>
+              ✓
+            </div>
+            <span className="text-slate-700 flex-1">{h}</span>
+          </li>
+        ))}
       </ul>
-      <div className="mt-6 flex gap-3">
-        <a className="btn" style={{background:accent}} href={title === "For owners" ? "/owner" : "/investor"}>Open App</a>
-        <a className="btn-outline ring-slate-300 hover:ring-slate-400" href="#calc">Try calculator</a>
+
+      {/* CTA buttons */}
+      <div className="flex flex-col gap-3">
+        <a
+          className="btn text-center text-lg font-bold py-4 shadow-lg hover:shadow-xl transition-all"
+          style={{background: `linear-gradient(135deg, ${accent}, ${accent}dd)`}}
+          href={title === "For owners" ? "/owner" : "/investor"}
+        >
+          Open App →
+        </a>
+        <a className="btn-outline ring-2 text-center font-semibold py-3" style={{borderColor: accent, color: accent}} href="#calc">
+          Try calculator
+        </a>
       </div>
     </div>
   );
@@ -442,14 +574,57 @@ function CTA(){
 
 function Footer(){
   return (
-    <footer className="border-t border-slate-200 bg-white py-10">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-lg" style={{background:"linear-gradient(135deg,var(--rf-green),var(--rf-blue))"}} />
-          <div className="font-bold">RoomLen</div>
+    <footer className="border-t-2 border-slate-200 bg-gradient-to-b from-white to-slate-50 py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Main footer content */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+          {/* Logo y branding */}
+          <div className="flex items-center gap-4">
+            <img src="/roomlenlogo.png" alt="RoomLen" className="h-12 w-auto" />
+            <div>
+              <div className="font-bold text-lg text-slate-900">RoomLen</div>
+              <div className="text-sm text-slate-600 italic">&quot;Live. Rent. Earn.&quot;</div>
+            </div>
+          </div>
+
+          {/* Built with */}
+          <div className="flex flex-col items-start md:items-end gap-3">
+            <div className="text-sm text-slate-600 flex items-center gap-2">
+              <span>Built from</span>
+              <span className="text-lg">🇲🇽</span>
+              <span>&</span>
+              <span className="text-lg">🇧🇴</span>
+            </div>
+
+            {/* Powered by Polkadot */}
+            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-xl ring-1 ring-slate-200 shadow-sm">
+              <span className="text-xs font-semibold text-slate-600">Powered by</span>
+              <img
+                src="/polkadot_logo.png"
+                alt="Polkadot"
+                className="h-6 w-auto"
+              />
+            </div>
+          </div>
         </div>
-        <div className="text-sm text-slate-500">
-          © {new Date().getFullYear()} RoomLen. Built from 🇲🇽. &quot;Live. Rent. Earn.&quot;
+
+        {/* Divider */}
+        <div className="h-px bg-gradient-to-r from-[#16A957] via-slate-300 to-[#1297C8] mb-6"></div>
+
+        {/* Bottom section */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+          <div>
+            © {new Date().getFullYear()} RoomLen. All rights reserved.
+          </div>
+          <div className="flex items-center gap-4">
+            <a href="#" className="hover:text-[#16A957] transition">Privacy</a>
+            <span>•</span>
+            <a href="#" className="hover:text-[#1297C8] transition">Terms</a>
+            <span>•</span>
+            <a href="https://github.com/hackatonmxnb/roomlen-web" target="_blank" rel="noopener noreferrer" className="hover:text-[#16A957] transition">
+              GitHub
+            </a>
+          </div>
         </div>
       </div>
     </footer>

@@ -19,11 +19,33 @@ import RentalNFTABI from "@/lib/abi/VerifiableRentalAgreementNFT.json";
 
 // Import Viem hooks and utilities
 import { createPublicClient, http, formatUnits } from "viem";
-import { moonbaseAlpha } from "viem/chains";
+import { defineChain } from "viem";
+
+// Define Paseo Testnet chain
+const paseoTestnet = defineChain({
+  id: 420420422,
+  name: 'Paseo Testnet',
+  nativeCurrency: {
+    name: 'PAS',
+    symbol: 'PAS',
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://testnet-passet-hub-eth-rpc.polkadot.io'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Blockscout',
+      url: 'https://blockscout-passet-hub.parity-testnet.parity.io',
+    },
+  },
+});
 
 // Create a public client to interact with the blockchain
 const publicClient = createPublicClient({
-  chain: moonbaseAlpha,
+  chain: paseoTestnet,
   transport: http(),
 });
 
@@ -145,8 +167,8 @@ export default function InvestorDashboard() {
                 irrAPR: irrAPR,
                 ocPct: tier ? Number(tier.ocBps) / 100 : 0,
                 haircutPct: tier ? Number(tier.haircutBps) / 100 : 0,
-                chain: "Moonbase Alpha",
-                currency: "DEV",
+                chain: "Paseo Testnet",
+                currency: "PAS",
                 riskTier: String.fromCharCode(65 + riskTiers.indexOf(tier)), // A, B, C...
             }));
 
