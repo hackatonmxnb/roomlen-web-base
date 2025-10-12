@@ -9,7 +9,7 @@
 [![Live Demo](https://img.shields.io/badge/🌐_LIVE_DEMO-Try_Now-00C7B7?style=for-the-badge&logo=netlify)](https://roomlen.netlify.app/)
 [![Live on Paseo](https://img.shields.io/badge/🚀_Blockchain-Paseo_Testnet-E6007A?style=for-the-badge)](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4)
 [![Tests Passing](https://img.shields.io/badge/✅_Tests-9/9_Passing-success?style=for-the-badge)](Foundry/test/)
-[![LATIN HACK](https://img.shields.io/badge/🏆-LATIN_HACK_2025-FFD700?style=for-the-badge)](.)
+[![LATIN HACK](https://img.shields.io/badge/-LATIN_HACK_2025-FFD700?style=for-the-badge)](.)
 
 <div align="center" style="background: linear-gradient(135deg, #00C7B7 0%, #1297C8 100%); padding: 20px; border-radius: 10px; margin: 20px 0;">
 
@@ -416,22 +416,6 @@ This is a **hackathon prototype** on testnet. **Not audited. Not for production.
 
 ---
 
-## 👥 Team
-
-**Built during LATIN HACK 2025**
-
-<div align="center">
-
-| Role | Location | Contribution |
-|:-----|:--------:|:-------------|
-| **Smart Contracts** | 🇲🇽 Mexico | Core protocol, testing, deployment |
-| **Frontend** | 🇧🇴 Bolivia | UI/UX, dashboards, integrations |
-| **Full Stack** | 🇲🇽 Mexico | API, bots, risk engine |
-
-</div>
-
----
-
 ## 📄 License
 
 **MIT License** - See [LICENSE](LICENSE) for details
@@ -453,12 +437,12 @@ This is a **hackathon prototype** on testnet. **Not audited. Not for production.
 
 <div align="center">
 
-### 🏆 LATIN HACK 2025 Submission
+### LATIN HACK 2025 Submission
 
 **RoomLen** - *Unlocking LATAM's $50B rental economy*
 
 **"Live. Rent. Earn."**
 
-Made with ❤️ from 🇲🇽 🇧🇴
+Made with from 🇲🇽 🇧🇴
 
 </div>
