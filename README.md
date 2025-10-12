@@ -313,22 +313,6 @@ This is a **hackathon prototype** on testnet. **Not audited. Not for production.
 
 ---
 
-## 👥 Team
-
-**Built during LATIN HACK 2025**
-
-<div align="center">
-
-| Role | Location | Contribution |
-|:-----|:--------:|:-------------|
-| **Smart Contracts** | 🇲🇽 Mexico | Core protocol, testing, deployment |
-| **Frontend** | 🇧🇴 Bolivia | UI/UX, dashboards, integrations |
-| **Full Stack** | 🇲🇽 Mexico | API, bots, risk engine |
-
-</div>
-
----
-
 ## 📄 License
 
 **MIT License** - See [LICENSE](LICENSE) for details
