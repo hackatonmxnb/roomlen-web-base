@@ -2,10 +2,6 @@
 
 import React, { useMemo, useState } from "react";
 
-// RoomLen – MVP landing page (single-file React component)
-// Tailwind-first design. Paste into any React/Next project and render.
-// Colors are based on the RoomFi/RoomLen palette you defined earlier.
-
 export default function RoomLenLanding() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
@@ -24,7 +20,6 @@ export default function RoomLenLanding() {
   );
 }
 
-// -------------------- Design Tokens --------------------
 function BrandTokens() {
   return (
     <style>{`
@@ -35,12 +30,40 @@ function BrandTokens() {
         --rf-blueTealP:#ACDBE5; --rf-greenAccP:#ADDFC9;
         --rf-ink:#0F172A; --rf-slate:#334155; --rf-cloud:#CBD5E1; --rf-snow:#F8FAFC;
       }
-      .btn{ @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold shadow-sm hover:shadow-md transition;
+      .btn{ @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105;
             background: var(--rf-blue); color:white; }
-      .btn-outline{ @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold ring-1 transition; 
+      .btn-outline{ @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold ring-1 transition-all duration-200 hover:scale-105;
             color: var(--rf-blue); border-color: transparent; }
       .badge{ @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ring-1 ring-slate-200 bg-white; }
-      .kpi{ @apply rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200; }
+      .kpi{ @apply rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition-shadow duration-200 hover:shadow-lg; }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse-soft {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+
+      .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+
+      .animate-pulse-soft {
+        animation: pulse-soft 3s ease-in-out infinite;
+      }
     `}</style>
   );
 }
@@ -49,7 +72,6 @@ import { useWallet } from "@/lib/WalletProvider";
 import Link from "next/link";
 import WalletConnect from "@/components/WalletConnect";
 
-// -------------------- Top Bar --------------------
 function TopBar(){
   const { isConnected } = useWallet();
 
@@ -85,7 +107,6 @@ function TopBar(){
   );
 }
 
-// -------------------- Hero --------------------
 function Hero(){
   return (
     <section className="relative overflow-hidden">
@@ -137,7 +158,6 @@ function KPI({label, value, emphasized}:{label:string, value:string, emphasized?
   );
 }
 
-// -------------------- Trust strip --------------------
 function TrustStrip(){
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
@@ -161,7 +181,6 @@ function TrustItem({title, desc, icon}:{title:string, desc:string, icon:string})
   );
 }
 
-// -------------------- How it works --------------------
 function HowItWorks(){
   const steps = [
     {title:"Tokenize the lease", desc:"Create a LeaseNFT with key terms + signed docs hash.", icon:"📝"},
@@ -190,7 +209,6 @@ function HowItWorks(){
   );
 }
 
-// -------------------- Owners vs Investors --------------------
 function DualTracks(){
   return (
     <section className="py-16">
@@ -230,7 +248,6 @@ function TrackCard({title, highlights, accent}:{title:string, highlights:string[
   );
 }
 
-// -------------------- Calculator --------------------
 function CalculatorSection(){
   return (
     <section id="calc" className="py-16 bg-[var(--rf-snow)]">
@@ -331,7 +348,6 @@ function SummaryCard({title, value, note, highlight}:{title:string, value:string
   );
 }
 
-// Bisection solver for IRR (monthly)
 function bisectionIRR(R:number, n:number, advance:number){
   let lo = 0, hi = 1; // 0%..100% monthly
   const f = (x:number)=> {
@@ -358,7 +374,6 @@ function fmtPct(x:number){
   return (x*100).toFixed(1) + "%";
 }
 
-// -------------------- Safety Section --------------------
 function SafetySection(){
   const items = [
     {title:"Escrow on‑chain", desc:"Transparent flows with programmatic rules and events."},
@@ -383,7 +398,6 @@ function SafetySection(){
   );
 }
 
-// -------------------- FAQ --------------------
 function FAQ(){
   const qa = [
     {q:"Is RoomLen a loan?", a:"It's an advance against lease cash‑flows with rights to collect monthly rent via escrow. Legal structure may vary by jurisdiction."},
@@ -411,7 +425,6 @@ function FAQ(){
   );
 }
 
-// -------------------- CTA & Footer --------------------
 function CTA(){
   return (
     <section id="contact" className="py-16">

@@ -1,4 +1,9 @@
-export const wmxnbAddress = '0xf8bB2Ce2643f89e6B80fDaC94483cDA91110d95a';
-export const rentalNftAddress = '0x1acB65533d0f5DBB99D6F3c30AcAd0A5499325c2';
-export const lenderReceiptNftAddress = '0x111592714036D6870f63807F1b659B4dEf2C6C43'; // This is the TRR token
-export const lendingProtocolAddress = '0xa70EfcB817358689E46b664602b757F9Fd183C6b';
+export const wmxnbAddress = '0xF48A62Fd563b3aBfDBA8542a484bb87183ef6342';
+export const rentalNftAddress = '0x9a340Cd35537C05ec78b41064D99d15fb08e2b97';
+export const lenderReceiptNftAddress = '0xC542E39374e63836B2307034E29cceE435A65545';
+export const lendingProtocolAddress = '0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4';
+
+export const CHAIN_ID = 420420422;
+export const CHAIN_NAME = 'Paseo Testnet';
+export const RPC_URL = 'https://testnet-passet-hub-eth-rpc.polkadot.io';
+export const BLOCK_EXPLORER = 'https://blockscout-passet-hub.parity-testnet.parity.io';

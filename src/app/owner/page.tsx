@@ -4,31 +4,26 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useWallet } from '@/lib/WalletProvider';
 import WalletConnect from '@/components/WalletConnect';
-
-// --- ABIs Y DIRECCIONES ---
 import VRA_NFT_ABI from '@/lib/abi/VerifiableRentalAgreementNFT.json';
 import LENDING_PROTOCOL_ABI from '@/lib/abi/LendingProtocol.json';
 import { lendingProtocolAddress, rentalNftAddress as VRA_NFT_ADDRESS } from '@/lib/contractAddresses';
 
-
-// --- TIPOS DE DATOS ---
 type TLeaseStatus = 'Not Tokenized' | 'Tokenized' | 'Escrow Active';
 interface Lease {
   id: string; property: string; location: string; rent: number; status: TLeaseStatus; termMonths: number;
   onTimeRatio?: number; rentToIncome?: number; depositMonths?: number; docsQuality?: number; marketIndex?: number;
-  nftId?: number; // Add nftId to link to the contract
+  nftId?: number;
+  publishedTxHash?: string;
+  isPublished?: boolean;
 }
 interface Advance { id: string; amount: number; property: string; location: string; fundedOn: string; remaining: number; ocPct: number; haircutPct: number; stream: string; termMonths: number; rent: number; }
 interface OwnerOffer { id: string; property: string; location: string; advance: number; irrAPR: number; termMonths: number; ocPct: number; haircutPct: number; fees: number; chain: string; riskTier: string; rent: number; }
 
-// --- DATOS DE PRUEBA ---
 const MOCK_LEASES: Lease[] = [
   { id: 'mock1', property: 'Loft Reforma 210', location: 'CDMX • Juárez', rent: 10000, status: 'Not Tokenized', termMonths: 12, onTimeRatio: 0.98, rentToIncome: 0.3, depositMonths: 2, docsQuality: 0.9, marketIndex: 1.1 },
   { id: 'mock2', property: 'Depto Roma Nte 88', location: 'CDMX • Roma', rent: 8000, status: 'Not Tokenized', termMonths: 12, onTimeRatio: 0.92, rentToIncome: 0.4, depositMonths: 1, docsQuality: 0.7, marketIndex: 1.0 },
   { id: 'mock3', property: 'Casa Lomas 34', location: 'CDMX • Lomas', rent: 12000, status: 'Not Tokenized', termMonths: 18, onTimeRatio: 1.0, rentToIncome: 0.25, depositMonths: 2, docsQuality: 1.0, marketIndex: 1.2 },
 ];
-
-// --- COMPONENTES DE UI ---
 
 const Header = () => (
     <header className="bg-white ring-1 ring-slate-200 sticky top-0 z-30">
@@ -83,10 +78,33 @@ const PropertiesCard = ({ leases, onGetAdvance }: { leases: Lease[], onGetAdvanc
                 <div className="py-3 text-center text-slate-500">No properties tokenized yet.</div>
             ) : leases.map(lease => (
                 <div key={lease.id} className="py-3 flex items-center justify-between gap-3">
-                    <div><div className="font-medium">{lease.property}</div><div className="text-slate-600 text-sm">{lease.location} • Rent ${lease.rent.toLocaleString()} / mo</div></div>
+                    <div>
+                        <div className="font-medium">{lease.property}</div>
+                        <div className="text-slate-600 text-sm">{lease.location} • Rent ${lease.rent.toLocaleString()} / mo</div>
+                    </div>
                     <div className="flex items-center gap-2">
-                         <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 bg-green-100 text-green-800`}>{lease.status}</span>
-                        <button onClick={() => onGetAdvance(lease)} className="btn-sm bg-green-600 text-white">Get advance</button>
+                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 bg-green-100 text-green-800`}>{lease.status}</span>
+                        {lease.isPublished ? (
+                            <>
+                                <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 bg-blue-100 text-blue-800">
+                                    Published ✓
+                                </span>
+                                {lease.publishedTxHash && (
+                                    <a
+                                        href={`https://blockscout-passet-hub.parity-testnet.parity.io/tx/${lease.publishedTxHash}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn-sm bg-slate-600 text-white hover:bg-slate-700"
+                                    >
+                                        View on Explorer
+                                    </a>
+                                )}
+                            </>
+                        ) : (
+                            <button onClick={() => onGetAdvance(lease)} className="btn-sm bg-green-600 text-white hover:bg-green-700">
+                                Get advance
+                            </button>
+                        )}
                     </div>
                 </div>
             ))}
@@ -117,7 +135,7 @@ const DemoPropertiesCard = ({ leases, onTokenize }: { leases: Lease[], onTokeniz
 const OffersCard = ({ offers }: { offers: OwnerOffer[] }) => (
     <div className="bg-white p-6 rounded-2xl shadow-sm ring-1 ring-slate-200">
         <h3 className="font-semibold text-lg text-slate-800">Offers <span className="text-sm text-slate-500 font-normal ml-1">{offers.length} new</span></h3>
-        {offers.length === 0 ? <p className="mt-2 text-sm text-slate-600 text-center py-4">No offers yet.</p> : offers.map(offer => <div key={offer.id}> {/* UI for offer... */} </div>)}
+        {offers.length === 0 ? <p className="mt-2 text-sm text-slate-600 text-center py-4">No offers yet.</p> : offers.map(offer => <div key={offer.id}></div>)}
     </div>
 );
 
@@ -187,70 +205,303 @@ const TokenizePanel = ({ isOpen, onClose, onConfirm, lease }: { isOpen: boolean,
 };
 
 const AdvanceFlowPanel = ({ flow, onClose, onImport, onRunAI, onPublish, onShowToast }: { flow: any, onClose: () => void, onImport: () => void, onRunAI: () => void, onPublish: () => void, onShowToast: (msg: string) => void }) => {
+    const handlePDFUpload = () => {
+        onShowToast("PDF uploaded successfully!");
+        // Para el hackathon, avanzar directo al AI scoring
+        setTimeout(() => {
+            onRunAI();
+        }, 800);
+    };
+
+    const handleRoomFiConnect = () => {
+        onShowToast("Opening RoomFi...");
+        // Abrir RoomFi en nueva pestaña
+        window.open('https://roomfi.netlify.app', '_blank');
+        // Para el hackathon, avanzar directo al AI scoring
+        setTimeout(() => {
+            onShowToast("Connected to RoomFi!");
+            onRunAI();
+        }, 1000);
+    };
+
+    const renderStepIndicator = () => {
+        const steps = [
+            { key: 'upload', label: 'Upload', icon: '📄' },
+            { key: 'ai-scoring', label: 'AI Score', icon: '🤖' },
+            { key: 'review', label: 'Review', icon: '✓' },
+            { key: 'loading', label: 'Processing', icon: '⏳' },
+            { key: 'published', label: 'Done', icon: '✓' }
+        ];
+        const currentIndex = steps.findIndex(s => s.key === flow.step);
+
+        return (
+            <div className="flex items-center justify-between mb-6">
+                {steps.map((step, idx) => (
+                    <React.Fragment key={step.key}>
+                        <div className="flex flex-col items-center">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                                idx < currentIndex ? 'bg-green-500 text-white' :
+                                idx === currentIndex ? 'bg-gradient-to-br from-[#16A957] to-[#1297C8] text-white shadow-lg scale-110' :
+                                'bg-slate-200 text-slate-400'
+                            }`}>
+                                {idx < currentIndex ? '✓' : step.icon}
+                            </div>
+                            <div className={`text-xs mt-1 font-medium ${idx <= currentIndex ? 'text-slate-700' : 'text-slate-400'}`}>
+                                {step.label}
+                            </div>
+                        </div>
+                        {idx < steps.length - 1 && (
+                            <div className={`flex-1 h-1 mx-2 rounded-full transition-all ${
+                                idx < currentIndex ? 'bg-green-500' : 'bg-slate-200'
+                            }`} />
+                        )}
+                    </React.Fragment>
+                ))}
+            </div>
+        );
+    };
+
     const renderStepContent = () => {
         switch (flow.step) {
-            case 'start':
-                return (
-                    <>
-                        <h3 className="font-semibold text-lg">1. Request Advance</h3>
-                        <p className="mt-1 text-slate-600">Your tokenized lease is eligible for an advance. Review the details and publish to the marketplace.</p>
-                        <div className="mt-4 space-y-4">
-                           <button onClick={onRunAI} className="w-full btn bg-green-600 hover:bg-green-700 text-lg">Estimate & Request Advance</button>
-                        </div>
-                    </>
-                );
-            case 'loading':
-                 return (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                        <img src="/roomlenlogo.png" alt="RoomLen Logo" className="h-24 w-auto animate-pulse" />
-                        <p className="mt-4 text-slate-600 font-semibold">Requesting loan on-chain...</p>
-                        <p className="text-sm text-slate-500">Please confirm the transaction in your wallet.</p>
-                    </div>
-                );
-            case 'result':
+            case 'upload':
                 return (
                     <div className="flex flex-col h-full">
                         <div className="flex-grow">
-                            <h3 className="font-semibold text-lg">Review & Publish</h3>
-                            {flow.ai ? (
-                                <div className="mt-4 grid grid-cols-2 gap-4 text-center">
-                                    <div className="p-4 bg-slate-100 rounded-xl"><div className="text-sm text-slate-500">Risk Tier</div><div className="font-bold text-2xl">{flow.ai.tier}</div></div>
-                                    <div className="p-4 bg-slate-100 rounded-xl"><div className="text-sm text-slate-500">AI Score</div><div className="font-bold text-2xl">{flow.ai.score}</div></div>
-                                    <div className="p-4 bg-green-100 text-green-800 rounded-xl col-span-2"><div className="text-sm">Estimated Advance</div><div className="font-bold text-3xl">${flow.ai.advance.toLocaleString()}</div></div>
+                            <h3 className="font-semibold text-2xl text-slate-900 mb-2">Upload Documentation</h3>
+                            <p className="text-slate-600 mb-6">Choose how to provide your rental agreement data for AI analysis.</p>
+
+                            <div className="space-y-4">
+                                {/* PDF Upload Option */}
+                                <div
+                                    className="card border-2 transition-all cursor-pointer hover:border-[#16A957] hover:shadow-md border-slate-200 hover:bg-green-50"
+                                    onClick={handlePDFUpload}
+                                >
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ADE0C4] to-[#ACDBE5] flex items-center justify-center text-2xl flex-shrink-0">
+                                            📄
+                                        </div>
+                                        <div className="flex-grow">
+                                            <div className="font-semibold text-slate-900">Upload Lease PDF</div>
+                                            <div className="text-sm text-slate-600 mt-1">
+                                                AI will analyze your signed rental agreement, tenant information, and payment history.
+                                            </div>
+                                            <div className="mt-2 text-xs text-slate-500 italic">
+                                                Click to proceed with demo data →
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            ) : <p>Loading results...</p>}
+
+                                {/* RoomFi API Option */}
+                                <div
+                                    className="card border-2 transition-all cursor-pointer hover:border-[#1297C8] hover:shadow-md border-slate-200 hover:bg-blue-50"
+                                    onClick={handleRoomFiConnect}
+                                >
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1297C8] to-[#149AB5] flex items-center justify-center text-2xl flex-shrink-0">
+                                            🔗
+                                        </div>
+                                        <div className="flex-grow">
+                                            <div className="font-semibold text-slate-900">Connect with RoomFi</div>
+                                            <div className="text-sm text-slate-600 mt-1">
+                                                Automatically pull verified rental data, payment history, and tenant scores from RoomFi.
+                                            </div>
+                                            <div className="mt-2 text-xs text-blue-600 font-medium">
+                                                ⚡ Faster • More accurate • Real-time data
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex-shrink-0 pt-4">
-                            <p className="text-xs text-slate-500 mb-4">This is an estimate. By publishing, you agree to list this advance on the RoomLen marketplace.</p>
-                            <button onClick={onPublish} className="w-full btn bg-blue-600 hover:bg-blue-700 text-lg">Publish to Marketplace</button>
+
+                        <div className="flex-shrink-0 pt-6">
+                            <p className="text-xs text-slate-500 text-center mb-3">
+                                For hackathon demo: Click any option above to continue
+                            </p>
+                            <button onClick={onClose} className="w-full btn-ghost">Cancel</button>
                         </div>
                     </div>
                 );
-            case 'published':
+
+            case 'ai-scoring':
+                return (
+                    <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                        <div className="relative mb-8">
+                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#ADE0C4] to-[#ACDBE5] flex items-center justify-center animate-pulse">
+                                <div className="text-6xl">🤖</div>
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center">
+                                <div className="w-8 h-8 border-4 border-[#16A957] border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        </div>
+                        <h3 className="font-bold text-2xl text-slate-900 mb-2">AI is Analyzing...</h3>
+                        <p className="text-slate-600 max-w-sm">
+                            Our AI is reviewing your lease agreement, calculating risk scores, and estimating your advance amount.
+                        </p>
+                        <div className="mt-8 space-y-2 text-left w-full max-w-sm">
+                            <div className="flex items-center gap-3 text-sm text-slate-700">
+                                <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs">✓</div>
+                                <span>Document verification</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-slate-700">
+                                <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs">✓</div>
+                                <span>Tenant credit analysis</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-slate-700">
+                                <div className="w-5 h-5 rounded-full bg-blue-500 animate-pulse flex items-center justify-center">
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                                <span>Risk scoring & pricing...</span>
+                            </div>
+                        </div>
+                    </div>
+                );
+
+            case 'review':
+                return (
+                    <div className="flex flex-col h-full">
+                        <div className="flex-grow">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#16A957] to-[#1297C8] flex items-center justify-center text-2xl">
+                                    ✓
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-2xl text-slate-900">AI Scoring Complete!</h3>
+                                    <p className="text-sm text-slate-600">Review your advance details below</p>
+                                </div>
+                            </div>
+
+                            {flow.ai ? (
+                                <div className="space-y-4 mt-6">
+                                    {/* Main Score Card */}
+                                    <div className="card bg-gradient-to-br from-[#16A957] to-[#1297C8] text-white border-0 shadow-lg">
+                                        <div className="text-center">
+                                            <div className="text-sm opacity-90 mb-1">Estimated Advance Amount</div>
+                                            <div className="font-bold text-5xl mb-2">${flow.ai.advance?.toLocaleString() || 'N/A'}</div>
+                                            <div className="text-sm opacity-90">Based on {flow.lease?.termMonths} month lease</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Score & Tier Grid */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="card bg-slate-50 border-slate-200">
+                                            <div className="text-xs text-slate-500 mb-1">Risk Tier</div>
+                                            <div className={`font-bold text-3xl ${
+                                                flow.ai.tier === 'A' ? 'text-green-600' :
+                                                flow.ai.tier === 'B' ? 'text-blue-600' : 'text-yellow-600'
+                                            }`}>
+                                                {flow.ai.tier}
+                                            </div>
+                                            <div className="text-xs text-slate-500 mt-1">
+                                                {flow.ai.tier === 'A' ? 'Excellent' : flow.ai.tier === 'B' ? 'Good' : 'Fair'}
+                                            </div>
+                                        </div>
+                                        <div className="card bg-slate-50 border-slate-200">
+                                            <div className="text-xs text-slate-500 mb-1">AI Credit Score</div>
+                                            <div className="font-bold text-3xl text-slate-900">{flow.ai.score}</div>
+                                            <div className="text-xs text-slate-500 mt-1">out of 100</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Terms Breakdown */}
+                                    <div className="card bg-white border-slate-200">
+                                        <div className="font-semibold text-slate-900 mb-3">Advance Terms</div>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-600">Haircut</span>
+                                                <span className="font-semibold text-slate-900">{flow.ai.haircutPct}%</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-600">Over-collateral</span>
+                                                <span className="font-semibold text-slate-900">{flow.ai.ocPct}%</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-600">Estimated IRR (APR)</span>
+                                                <span className="font-semibold text-slate-900">{flow.ai.irrAPR}%</span>
+                                            </div>
+                                            <div className="flex justify-between pt-2 border-t border-slate-200">
+                                                <span className="text-slate-600">Monthly Rent</span>
+                                                <span className="font-semibold text-slate-900">${flow.lease?.rent?.toLocaleString()}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <p className="text-slate-500">Loading AI results...</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex-shrink-0 pt-6 space-y-3">
+                            <div className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl">
+                                By publishing, you agree to list this advance request on the RoomLen marketplace for lenders to fund.
+                            </div>
+                            <button onClick={onPublish} className="w-full btn bg-gradient-to-r from-[#16A957] to-[#1297C8] text-white text-lg">
+                                Publish to Marketplace
+                            </button>
+                            <button onClick={onClose} className="w-full btn-ghost">Cancel</button>
+                        </div>
+                    </div>
+                );
+
+            case 'loading':
                 return (
                     <div className="flex flex-col items-center justify-center h-full text-center">
-                        <h3 className="font-semibold text-xl text-green-700">Published!</h3>
-                        <p className="mt-2 text-slate-600">Your advance request is now live on the marketplace.</p>
-                        <button onClick={onClose} className="mt-6 btn-outline">Close</button>
+                        <img src="/roomlenlogo.png" alt="RoomLen Logo" className="h-24 w-auto animate-pulse mb-6" />
+                        <div className="w-16 h-16 border-4 border-[#16A957] border-t-transparent rounded-full animate-spin mb-6"></div>
+                        <h3 className="font-bold text-xl text-slate-900 mb-2">Publishing to Blockchain...</h3>
+                        <p className="text-slate-600 max-w-sm">Please confirm the transaction in your wallet to publish your advance request.</p>
                     </div>
                 );
-            default: return <p>Unknown step</p>;
+
+            case 'published':
+                return (
+                    <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#16A957] to-[#1297C8] flex items-center justify-center text-5xl mb-6 shadow-lg">
+                            ✓
+                        </div>
+                        <h3 className="font-bold text-3xl text-slate-900 mb-3">Published Successfully!</h3>
+                        <p className="text-slate-600 max-w-sm mb-8">
+                            Your advance request is now live on the RoomLen marketplace. Lenders can review and fund your request.
+                        </p>
+                        <div className="w-full max-w-sm space-y-3">
+                            <button onClick={onClose} className="w-full btn bg-gradient-to-r from-[#16A957] to-[#1297C8] text-white">
+                                Back to Dashboard
+                            </button>
+                            <button className="w-full btn-ghost">View in Marketplace</button>
+                        </div>
+                    </div>
+                );
+
+            default:
+                return <p className="text-slate-500">Unknown step</p>;
         }
     };
 
-     return (
+    return (
         <>
             <div className={`fixed inset-0 z-40 transition-opacity duration-300 ${flow.open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onClose}>
                 <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm"></div>
             </div>
-            <div className={`fixed top-0 right-0 h-full w-full max-w-lg bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${flow.open ? 'translate-x-0' : 'translate-x-full'}`}>
-                <div className="p-6 h-full flex flex-col">
-                    <div className="flex-shrink-0 flex items-center justify-between">
-                        <h2 className="text-2xl font-bold text-slate-900">Get Advance</h2>
-                        <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 transition-colors">✕</button>
+            <div className={`fixed top-0 right-0 h-full w-full max-w-2xl bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${flow.open ? 'translate-x-0' : 'translate-x-full'}`}>
+                <div className="p-6 h-full flex flex-col overflow-y-auto">
+                    <div className="flex-shrink-0 flex items-center justify-between mb-4">
+                        <div>
+                            <h2 className="text-3xl font-bold text-slate-900">Get Advance</h2>
+                            <div className="text-sm text-slate-600 mt-1">
+                                Property: <span className="font-semibold text-slate-800">{flow.lease?.property}</span>
+                            </div>
+                        </div>
+                        <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 transition-colors text-2xl w-10 h-10 flex items-center justify-center">
+                            ✕
+                        </button>
                     </div>
-                    <div className="mt-4 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl">Property: <span className="font-semibold text-slate-800">{flow.lease?.property}</span></div>
-                    <div className="mt-6 flex-grow relative">
+
+                    {flow.step !== 'ai-scoring' && flow.step !== 'loading' && renderStepIndicator()}
+
+                    <div className="flex-grow relative">
                         {renderStepContent()}
                     </div>
                 </div>
@@ -283,7 +534,13 @@ export default function OwnerDashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     const [tokenizeFlow, setTokenizeFlow] = useState({ isOpen: false, lease: null as Lease | null });
-    const [advanceFlow, setAdvanceFlow] = useState({ open: false, step: 'start' as 'start' | 'loading' | 'result' | 'published', lease: null as Lease | null, ai: null as any });
+    const [advanceFlow, setAdvanceFlow] = useState({
+        open: false,
+        step: 'upload' as 'upload' | 'ai-scoring' | 'review' | 'loading' | 'published',
+        lease: null as Lease | null,
+        ai: null as any,
+        uploadMethod: null as 'pdf' | 'roomfi' | null
+    });
 
     useEffect(() => {
         const fetchOwnerData = async () => {
@@ -401,13 +658,42 @@ export default function OwnerDashboardPage() {
         }
     }
 
-    async function openAdvanceFlow(lease: Lease) { 
+    async function openAdvanceFlow(lease: Lease) {
         if (!lease.nftId) return;
-        setAdvanceFlow({ open: true, step: 'start', lease, ai: null });
+        setAdvanceFlow({ open: true, step: 'upload', lease, ai: null, uploadMethod: null });
     }
-    function closeAdvanceFlow() { setAdvanceFlow({ open: false, step: 'start', lease: null, ai: null }); }
-    
-    async function handleRequestAdvance() {
+    function closeAdvanceFlow() { setAdvanceFlow({ open: false, step: 'upload', lease: null, ai: null, uploadMethod: null }); }
+
+    async function handleRunAIScoring() {
+        if (!advanceFlow.lease) return;
+
+        // Cambiar a step 'ai-scoring'
+        setAdvanceFlow(f => ({ ...f, step: 'ai-scoring' }));
+
+        // Simular delay de AI processing
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Ejecutar scoreAndPrice() con datos del lease
+        const lease = advanceFlow.lease;
+        const aiInput = {
+            onTimeRatio: lease.onTimeRatio || 0.95,
+            rentToIncome: lease.rentToIncome || 0.35,
+            depositMonths: lease.depositMonths || 1,
+            termMonths: lease.termMonths,
+            docsQuality: lease.docsQuality || 0.85,
+            marketIndex: lease.marketIndex || 1.0,
+            rentMXN: lease.rent,
+            monthlyDiscPct: 1.5, // Tasa de descuento mensual
+            currencyMismatch: false
+        };
+
+        const aiResult = scoreAndPrice(aiInput);
+
+        // Cambiar a step 'review' con los resultados
+        setAdvanceFlow(f => ({ ...f, step: 'review', ai: aiResult }));
+    }
+
+    async function handlePublishAdvance() {
         if (!signer || !advanceFlow.lease?.nftId) return;
 
         setAdvanceFlow(f => ({ ...f, step: 'loading' }));
@@ -415,8 +701,19 @@ export default function OwnerDashboardPage() {
         try {
             const lendingContract = new ethers.Contract(lendingProtocolAddress, LENDING_PROTOCOL_ABI, signer);
             const tx = await lendingContract.requestLoan(advanceFlow.lease.nftId);
-            setTxInfo({ hash: tx.hash });
+            const txHash = tx.hash;
+            setTxInfo({ hash: txHash });
             await tx.wait();
+
+            // Actualizar el lease como publicado con el hash de la transacción
+            setLeases(prevLeases =>
+                prevLeases.map(l =>
+                    l.id === advanceFlow.lease?.id
+                        ? { ...l, isPublished: true, publishedTxHash: txHash }
+                        : l
+                )
+            );
+
             setAdvanceFlow(f => ({ ...f, step: 'published' }));
             showToast("Advance requested successfully!");
         } catch (err: any) {
@@ -424,7 +721,7 @@ export default function OwnerDashboardPage() {
             const reason = err.reason || 'Transaction failed.';
             setTxInfo({ error: reason });
             showToast(reason);
-            setAdvanceFlow(f => ({ ...f, step: 'start' }));
+            setAdvanceFlow(f => ({ ...f, step: 'upload' }));
         }
     }
 
@@ -443,7 +740,7 @@ export default function OwnerDashboardPage() {
                             { (txInfo.hash || txInfo.error) && (
                                 <div className={`mt-6 p-4 rounded-xl ${txInfo.hash ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
                                     <p className="font-semibold">{txInfo.hash ? 'Transaction Sent!' : 'Error'}</p>
-                                    {txInfo.hash ? <a href={`https://paseo.moonscan.io/tx/${txInfo.hash}`} target="_blank" rel="noopener noreferrer" className="text-sm break-all underline">View on Moonscan: {txInfo.hash}</a> : <p className="text-sm">{txInfo.error}</p>}
+                                    {txInfo.hash ? <a href={`https://blockscout-passet-hub.parity-testnet.parity.io/tx/${txInfo.hash}`} target="_blank" rel="noopener noreferrer" className="text-sm break-all underline">View on Explorer: {txInfo.hash}</a> : <p className="text-sm">{txInfo.error}</p>}
                                 </div>
                             )}
                         </div>
@@ -455,13 +752,13 @@ export default function OwnerDashboardPage() {
                 )}
             </main>
             <TokenizePanel isOpen={tokenizeFlow.isOpen} onClose={closeTokenizePanel} onConfirm={handleTokenizeConfirm} lease={tokenizeFlow.lease} />
-            <AdvanceFlowPanel 
-                flow={advanceFlow} 
-                onClose={closeAdvanceFlow} 
-                onImport={() => {}} 
-                onRunAI={handleRequestAdvance}
-                onPublish={handleRequestAdvance}
-                onShowToast={showToast} 
+            <AdvanceFlowPanel
+                flow={advanceFlow}
+                onClose={closeAdvanceFlow}
+                onImport={() => {}}
+                onRunAI={handleRunAIScoring}
+                onPublish={handlePublishAdvance}
+                onShowToast={showToast}
             />
             <Toast message={toast.message} show={toast.show} />
             <Footer />

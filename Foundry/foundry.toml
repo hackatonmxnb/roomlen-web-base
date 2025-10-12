@@ -4,4 +4,10 @@ out = "out"
 libs = ["../lib"]
 remappings = ["openzeppelin-contracts=../lib/openzeppelin-contracts"]
 
+[rpc_endpoints]
+paseo = "https://testnet-passet-hub-eth-rpc.polkadot.io"
+
+[etherscan]
+paseo = { key = "ABC123", chain = 420420422, url = "https://blockscout-passet-hub.parity-testnet.parity.io/api" }
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
