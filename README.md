@@ -655,12 +655,9 @@ Test result: ok. 24 passed; 0 failed; finished in 1.23s
 
 **"Live. Rent. Earn."**
 
-Made with ❤️ from 🇲🇽 Mexico & 🇧🇴 Bolivia
+From 🇲🇽 Mexico & 🇧🇴 Bolivia
 
-[**🚀 Try It Now**](https://roomlen.netlify.app/) • [**📖 Docs**](#) • [**💬 Contact**](mailto:contact@roomlen.app)
+[**🚀 Try It Now**](https://roomlen.netlify.app/) • [**📖 Docs**](#) 
 
----
-
-**⭐ If you like this project, give it a star on GitHub!**
 
 </div>
