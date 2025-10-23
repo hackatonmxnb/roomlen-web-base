@@ -3,11 +3,29 @@ src = "src"
 out = "out"
 libs = ["../lib"]
 remappings = ["openzeppelin-contracts=../lib/openzeppelin-contracts"]
+solc_version = "0.8.20"
+optimizer = true
+optimizer_runs = 200
+via_ir = true  # Habilitado para evitar "Stack too deep" errors
 
+# Excluir archivos archivados y de prueba
+exclude = [
+    "src/archive/**",
+    "script/archive/**",
+    "test/**",
+    "script/Counter.s.sol",
+    "script/CreateDemoTransactions.s.sol",
+    "script/Deploy.s.sol",
+    "script/DeployAll.s.sol"
+]
+
+# Base Network Configuration
 [rpc_endpoints]
-paseo = "https://testnet-passet-hub-eth-rpc.polkadot.io"
+base_sepolia = "https://sepolia.base.org"
+base_mainnet = "https://mainnet.base.org"
 
 [etherscan]
-paseo = { key = "ABC123", chain = 420420422, url = "https://blockscout-passet-hub.parity-testnet.parity.io/api" }
+base_sepolia = { key = "${BASESCAN_API_KEY}", chain = 84532, url = "https://api-sepolia.basescan.org/api" }
+base_mainnet = { key = "${BASESCAN_API_KEY}", chain = 8453, url = "https://api.basescan.org/api" }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

@@ -4,14 +4,14 @@
 
 ### Unlock Liquidity from Rental Agreements
 
-**Convert signed leases into instant capital on Polkadot**
+**Convert signed leases into instant capital on Base**
 
 [![Live Demo](https://img.shields.io/badge/🌐_LIVE_DEMO-Try_Now-00C7B7?style=for-the-badge&logo=netlify)](https://roomlen.netlify.app/)
-[![Live on Paseo](https://img.shields.io/badge/🚀_Blockchain-Paseo_Testnet-E6007A?style=for-the-badge)](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4)
-[![Tests Passing](https://img.shields.io/badge/✅_Tests-9/9_Passing-success?style=for-the-badge)](Foundry/test/)
+[![Live on Base](https://img.shields.io/badge/🚀_Blockchain-Base_Sepolia-0052FF?style=for-the-badge&logo=coinbase)](https://sepolia.basescan.org/address/0xeD9018D47ee787C5d84A75A42Df786b8540cC75b)
+[![Tests Passing](https://img.shields.io/badge/✅_Tests-Passing-success?style=for-the-badge)](Foundry/test/)
 [![LATIN HACK](https://img.shields.io/badge/-LATIN_HACK_2025-FFD700?style=for-the-badge)](.)
 
-<div align="center" style="background: linear-gradient(135deg, #00C7B7 0%, #1297C8 100%); padding: 20px; border-radius: 10px; margin: 20px 0;">
+<div align="center" style="background: linear-gradient(135deg, #0052FF 0%, #1652F0 100%); padding: 20px; border-radius: 10px; margin: 20px 0;">
 
 ### 🌐 **[→ TRY LIVE DEMO NOW ←](https://roomlen.netlify.app/)**
 **No installation needed • Connect wallet • Start testing in 2 minutes**
@@ -32,29 +32,30 @@
 
 ### 🌐 **LIVE APP:** [**roomlen.netlify.app**](https://roomlen.netlify.app/)
 
-### ⚡ **Network Used:** Paseo Testnet (Polkadot EVM)
+### ⚡ **Network Used:** Base Sepolia Testnet (Optimism L2)
 
 </div>
 
 ### 📍 **Main Contract Address**
 ```
-0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4
+0xeD9018D47ee787C5d84A75A42Df786b8540cC75b
 ```
-[**View on Block Explorer** →](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4)
+[**View on BaseScan** →](https://sepolia.basescan.org/address/0xeD9018D47ee787C5d84A75A42Df786b8540cC75b)
 
-### 📄 **Contract ABI**
-Full ABI available at: [`LendingProtocol_ABI.json`](./LendingProtocol_ABI.json)
+### 📄 **Contract ABIs**
+Full ABIs available at: `Foundry/abis/` directory
 
 <details>
-<summary><b>🔗 All Deployed Contracts</b></summary>
+<summary><b>🔗 All Deployed Contracts (Base Sepolia)</b></summary>
 
-| Contract | Address | ABI Location |
-|:---------|:--------|:-------------|
-| **LendingProtocol** | `0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4` | [`LendingProtocol_ABI.json`](./LendingProtocol_ABI.json) |
-| **RentalNFT** | `0x9a340Cd35537C05ec78b41064D99d15fb08e2b97` | [`src/lib/abi/VerifiableRentalAgreementNFT.json`](./src/lib/abi/VerifiableRentalAgreementNFT.json) |
-| **ReceiptNFT** | `0xC542E39374e63836B2307034E29cceE435A65545` | [`Foundry/out/TokenReciboRoomlen.sol/TokenReciboRoomlen.json`](./Foundry/out/TokenReciboRoomlen.sol/TokenReciboRoomlen.json) |
-| **wMXNB** | `0x7EF4558fe6E4c3Db239Bb763664A452F23955F3D` | [`src/lib/abi/WMXNB.json`](./src/lib/abi/WMXNB.json) |
-| **SecondaryMarket** | `0xb2dE3684E6A452f142FD87AbA0B2B190059c27d0` | [`src/lib/abi/TinyEscrow.json`](./src/lib/abi/TinyEscrow.json) |
+| Contract | Address | Explorer Link |
+|:---------|:--------|:--------------|
+| **LendingProtocol V2** | `0xeD9018D47ee787C5d84A75A42Df786b8540cC75b` | [View](https://sepolia.basescan.org/address/0xeD9018D47ee787C5d84A75A42Df786b8540cC75b) |
+| **VRA-NFT V2** | `0x674687e09042452C0ad3D5EC06912bf4979bFC33` | [View](https://sepolia.basescan.org/address/0x674687e09042452C0ad3D5EC06912bf4979bFC33) |
+| **TRR-NFT V2** | `0xF8F626afB4AadB41Be7D746e53Ff417735b1C289` | [View](https://sepolia.basescan.org/address/0xF8F626afB4AadB41Be7D746e53Ff417735b1C289) |
+| **SecondaryMarket V2** | `0x9c2be1158ba6B8ED8B528B685058F743336b988F` | [View](https://sepolia.basescan.org/address/0x9c2be1158ba6B8ED8B528B685058F743336b988F) |
+| **USDC (Base Sepolia)** | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` | [View](https://sepolia.basescan.org/address/0x036CbD53842c5426634e7929541eC2318f3dCF7e) |
+| **USDT (Base Sepolia)** | `0xf8b6097E8c1adFa8B2f37c5876Ed07E87Dcf2C3C` | [View](https://sepolia.basescan.org/address/0xf8b6097E8c1adFa8B2f37c5876Ed07E87Dcf2C3C) |
 
 </details>
 
@@ -64,9 +65,9 @@ Full ABI available at: [`LendingProtocol_ABI.json`](./LendingProtocol_ABI.json)
 **👉 Just visit:** **[roomlen.netlify.app](https://roomlen.netlify.app/)** 👈
 
 Then:
-1. Click **"Connect Wallet"** → Add Paseo Network (automatic)
-2. Get free **PAS** tokens: [faucet.polkadot.io/paseo](https://faucet.polkadot.io/paseo)
-3. Get free **wMXNB** tokens (use faucet button on homepage)
+1. Click **"Connect Wallet"** → Add Base Sepolia Network (automatic)
+2. Get free **Base Sepolia ETH**: [Coinbase Faucet](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet)
+3. Get free **USDC** tokens (use faucet button on homepage or [Circle Faucet](https://faucet.circle.com/))
 4. Test as **Owner** ([/owner](https://roomlen.netlify.app/owner)) or **Investor** ([/investor](https://roomlen.netlify.app/investor))
 
 #### Option B: Run Locally (5 minutes)
@@ -89,14 +90,19 @@ forge test -vvv
 #### Option D: Direct Contract Calls
 ```bash
 # Check total loans
-cast call 0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4 \
+cast call 0xeD9018D47ee787C5d84A75A42Df786b8540cC75b \
   "getLoansCount()" \
-  --rpc-url https://testnet-passet-hub-eth-rpc.polkadot.io
+  --rpc-url https://sepolia.base.org
 
 # View risk tiers
-cast call 0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4 \
+cast call 0xeD9018D47ee787C5d84A75A42Df786b8540cC75b \
   "getRiskTiers()" \
-  --rpc-url https://testnet-passet-hub-eth-rpc.polkadot.io
+  --rpc-url https://sepolia.base.org
+
+# Check supported tokens
+cast call 0xeD9018D47ee787C5d84A75A42Df786b8540cC75b \
+  "getSupportedTokens()" \
+  --rpc-url https://sepolia.base.org
 ```
 
 <div align="center">
@@ -190,47 +196,49 @@ graph TB
 
 ```
 ┌─────────────────────────────────────┐
-│      LendingProtocol (Core)        │
+│    LendingProtocol V2 (Core)       │
 │   • requestLoan()  • fundLoan()    │
 │   • repayLoan()    • liquidate()   │
+│   • Multi-stablecoin support       │
 └──────────┬──────────┬───────┬──────┘
            │          │       │
-      ┌────▼───┐ ┌───▼────┐ ┌▼─────┐
-      │Rental  │ │Receipt │ │wMXNB │
-      │  NFT   │ │  NFT   │ │Token │
-      └────────┘ └────────┘ └──────┘
+      ┌────▼───┐ ┌───▼────┐ ┌▼─────────┐
+      │VRA-NFT │ │TRR-NFT │ │USDC/USDT │
+      │   V2   │ │   V2   │ │  Tokens  │
+      └────────┘ └────────┘ └──────────┘
               │
-         ┌────▼─────────────────┐
-         │  Paseo Testnet       │
-         │  (Polkadot Asset Hub)│
-         └──────────────────────┘
+         ┌────▼──────────────────┐
+         │  Base Sepolia         │
+         │  (Optimism L2)        │
+         └───────────────────────┘
 ```
 
 ---
 
 ## 📜 Deployed Contracts
 
-### 🌐 Network: Paseo Testnet (Polkadot)
+### 🌐 Network: Base Sepolia Testnet (Optimism L2)
 
 | Contract | Address | Explorer |
 |:---------|:--------|:--------:|
-| **🏦 LendingProtocol** | `0x6Bd6fD...5bA4` | [View ↗](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4) |
-| **🏠 RentalNFT** | `0x9a340C...2b97` | [View ↗](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x9a340Cd35537C05ec78b41064D99d15fb08e2b97) |
-| **🎫 ReceiptNFT** | `0xC542E3...A65545` | [View ↗](https://blockscout-passet-hub.parity-testnet.parity.io/address/0xC542E39374e63836B2307034E29cceE435A65545) |
-| **💵 wMXNB** | `0x7EF455...5F3D` | [View ↗](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x7EF4558fe6E4c3Db239Bb763664A452F23955F3D) |
-| **🔐 Escrow** | `0xb2dE36...7d0` | [View ↗](https://blockscout-passet-hub.parity-testnet.parity.io/address/0xb2dE3684E6A452f142FD87AbA0B2B190059c27d0) |
+| **🏦 LendingProtocol V2** | `0xeD9018...cC75b` | [View ↗](https://sepolia.basescan.org/address/0xeD9018D47ee787C5d84A75A42Df786b8540cC75b) |
+| **🏠 VRA-NFT V2** | `0x674687...bFC33` | [View ↗](https://sepolia.basescan.org/address/0x674687e09042452C0ad3D5EC06912bf4979bFC33) |
+| **🎫 TRR-NFT V2** | `0xF8F626...b1C289` | [View ↗](https://sepolia.basescan.org/address/0xF8F626afB4AadB41Be7D746e53Ff417735b1C289) |
+| **🛒 SecondaryMarket V2** | `0x9c2be1...6b988F` | [View ↗](https://sepolia.basescan.org/address/0x9c2be1158ba6B8ED8B528B685058F743336b988F) |
+| **💵 USDC** | `0x036CbD...dCF7e` | [View ↗](https://sepolia.basescan.org/address/0x036CbD53842c5426634e7929541eC2318f3dCF7e) |
+| **💵 USDT** | `0xf8b609...Cf2C3C` | [View ↗](https://sepolia.basescan.org/address/0xf8b6097E8c1adFa8B2f37c5876Ed07E87Dcf2C3C) |
 
 <details>
 <summary>📋 Network Configuration</summary>
 
 ```json
 {
-  "chainName": "Paseo Testnet",
-  "chainId": 420420422,
-  "rpcUrl": "https://testnet-passet-hub-eth-rpc.polkadot.io",
-  "nativeCurrency": { "name": "PAS", "symbol": "PAS", "decimals": 18 },
-  "blockExplorer": "https://blockscout-passet-hub.parity-testnet.parity.io",
-  "faucet": "https://faucet.polkadot.io/paseo"
+  "chainName": "Base Sepolia",
+  "chainId": 84532,
+  "rpcUrl": "https://sepolia.base.org",
+  "nativeCurrency": { "name": "ETH", "symbol": "ETH", "decimals": 18 },
+  "blockExplorer": "https://sepolia.basescan.org",
+  "faucet": "https://www.coinbase.com/faucets/base-ethereum-goerli-faucet"
 }
 ```
 </details>
@@ -254,9 +262,9 @@ graph TB
 **Just visit:** **[roomlen.netlify.app](https://roomlen.netlify.app/)**
 
 **Then:**
-1. Connect wallet to **Paseo Testnet** ([Add to MetaMask](https://chainlist.org/?testnets=true&search=paseo))
-2. Get **PAS tokens** from [faucet](https://faucet.polkadot.io/paseo)
-3. Get **wMXNB tokens** (testnet currency) - use faucet on homepage
+1. Connect wallet to **Base Sepolia** (automatic network detection)
+2. Get **Base Sepolia ETH** from [Coinbase Faucet](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet)
+3. Get **USDC tokens** - use faucet on homepage or [Circle Faucet](https://faucet.circle.com/)
 4. **Test the flow:**
    - 🏠 **Owner:** [/owner](https://roomlen.netlify.app/owner) → Tokenize → Get Advance
    - 💼 **Investor:** [/investor](https://roomlen.netlify.app/investor) → Browse → Fund Loans
@@ -278,14 +286,19 @@ Then open http://localhost:3000
 
 ```bash
 # View loans on-chain
-cast call 0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4 \
+cast call 0xeD9018D47ee787C5d84A75A42Df786b8540cC75b \
   "getLoansCount()" \
-  --rpc-url https://testnet-passet-hub-eth-rpc.polkadot.io
+  --rpc-url https://sepolia.base.org
 
 # View risk tiers
-cast call 0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4 \
+cast call 0xeD9018D47ee787C5d84A75A42Df786b8540cC75b \
   "getRiskTiers()" \
-  --rpc-url https://testnet-passet-hub-eth-rpc.polkadot.io
+  --rpc-url https://sepolia.base.org
+
+# View supported tokens (USDC, USDT)
+cast call 0xeD9018D47ee787C5d84A75A42Df786b8540cC75b \
+  "getSupportedTokens()" \
+  --rpc-url https://sepolia.base.org
 ```
 
 ### Option 4: Run Smart Contract Tests
@@ -300,14 +313,14 @@ forge test -vvv
 ---
 
 ## 🎬 Quick Demo
-**https://youtu.be/zOS0k01hqwI**
+
 ### User Flow: Owner Dashboard
 
 ```
-1. Connect wallet → Paseo Testnet
+1. Connect wallet → Base Sepolia (automatic)
 2. See demo properties (3 pre-populated)
-3. Click "Tokenize" → Creates Rental NFT on-chain
-4. Click "Get Advance" → AI analyzes & calculates offer
+3. Click "Tokenize" → Creates VRA-NFT V2 on-chain
+4. Click "Get Advance" → AI analyzes & calculates offer with USDC/USDT
 5. Click "Publish to Marketplace" → Loan request goes live
 ```
 
@@ -316,8 +329,8 @@ forge test -vvv
 ```
 1. Connect wallet → See marketplace
 2. Browse loan opportunities (Primary + Secondary market)
-3. Filter by: Risk tier, Term, APR
-4. Click "Fund" → Transfer wMXNB → Receive Receipt NFT
+3. Filter by: Risk tier, Term, APR, Token (USDC/USDT)
+4. Click "Fund" → Transfer USDC/USDT → Receive TRR-NFT V2
 5. Track returns in Portfolio tab
 ```
 
@@ -328,16 +341,16 @@ forge test -vvv
 <div align="center">
 
 ![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?style=flat-square&logo=solidity)
-![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript)
-![Polkadot](https://img.shields.io/badge/Polkadot-Paseo-E6007A?style=flat-square&logo=polkadot)
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript)
+![Base](https://img.shields.io/badge/Base-Sepolia-0052FF?style=flat-square&logo=coinbase)
 ![Foundry](https://img.shields.io/badge/Foundry-Tested-black?style=flat-square)
 
 </div>
 
-**Smart Contracts:** Solidity • OpenZeppelin • Foundry • ERC-721
-**Frontend:** Next.js • TypeScript • Tailwind CSS • ethers.js • viem
-**Blockchain:** Polkadot Paseo Testnet (EVM-compatible)
+**Smart Contracts:** Solidity 0.8.20 • OpenZeppelin • Foundry • ERC-721
+**Frontend:** Next.js 15 • TypeScript • Tailwind CSS • Wagmi • Viem • OnchainKit
+**Blockchain:** Base Sepolia Testnet (Optimism L2)
 
 ---
 
@@ -355,17 +368,20 @@ roomlen-web/
 │   │   ├── owner/                # Tokenization, Advance flow
 │   │   └── ui/                   # Shared UI components
 │   └── lib/
-│       ├── contractAddresses.ts  # Deployed addresses
+│       ├── contractAddresses.ts  # Base Sepolia addresses
+│       ├── wagmi.ts              # Wagmi config for Base
+│       ├── OnchainProviders.tsx  # OnchainKit provider
 │       └── abi/                  # Contract ABIs
 ├── Foundry/
-│   ├── src/                      # 📜 Solidity contracts
-│   │   ├── LendingProtocol.sol
-│   │   ├── VerifiableRentalAgreementNFT.sol
-│   │   ├── TokenReciboRoomlen.sol
-│   │   ├── wMXNB.sol
-│   │   └── SecondaryMarket.sol
+│   ├── src/                      # 📜 Solidity contracts V2
+│   │   ├── LendingProtocolV2.sol
+│   │   ├── VerifiableRentalAgreementNFTV2.sol
+│   │   ├── TokenReciboRoomlenV2.sol
+│   │   └── SecondaryMarketV2.sol
 │   ├── script/                   # Deployment scripts
-│   └── test/                     # ✅ Contract tests (9/9 passing)
+│   │   └── DeployAllV2Base.s.sol # Deploy to Base
+│   ├── deployments/              # Deployed contract info
+│   └── abis/                     # Generated ABIs
 └── scripts/
     └── liquidationBot.ts         # 🤖 Auto-liquidation bot
 ```
@@ -396,17 +412,18 @@ This is a **hackathon prototype** on testnet. **Not audited. Not for production.
 ## 🗺️ Roadmap
 
 ### ✅ Phase 1: MVP (Current)
-- Core smart contracts on Paseo
+- Core smart contracts V2 on Base Sepolia
 - Owner & Investor dashboards
 - P2P lending marketplace
+- Multi-stablecoin support (USDC, USDT)
 - Secondary market for NFTs
-- Liquidation bot
+- Smart Wallet integration (ERC-4337)
 
 ### 🔄 Phase 2: Beta (Q2 2025)
-- [ ] Mainnet deployment (Moonbeam/Asset Hub)
+- [ ] Base Mainnet deployment
 - [ ] KYC/AML integration
-- [ ] Advanced risk scoring with oracles
-- [ ] Multi-currency support (USDC, USDT)
+- [ ] Advanced risk scoring with Chainlink oracles
+- [ ] Cross-chain support (Optimism, Arbitrum)
 
 ### 🚀 Phase 3: Scale (Q3-Q4 2025)
 - [ ] Pooled lending (ERC-4626 vault)
@@ -428,8 +445,8 @@ This is a **hackathon prototype** on testnet. **Not audited. Not for production.
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-roomlen.netlify.app-00C7B7?style=for-the-badge&logo=netlify)](https://roomlen.netlify.app/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/hackatonmxnb/roomlen-web)
-[![Explorer](https://img.shields.io/badge/Block_Explorer-Paseo-E6007A?style=for-the-badge&logo=polkadot)](https://blockscout-passet-hub.parity-testnet.parity.io/address/0x6Bd6fD3114dc7BB3b5bD137A51F474e78D065bA4)
-[![Faucet](https://img.shields.io/badge/Get_Testnet_Tokens-Faucet-blue?style=for-the-badge)](https://faucet.polkadot.io/paseo)
+[![BaseScan](https://img.shields.io/badge/Block_Explorer-Base_Sepolia-0052FF?style=for-the-badge&logo=coinbase)](https://sepolia.basescan.org/address/0xeD9018D47ee787C5d84A75A42Df786b8540cC75b)
+[![Faucet](https://img.shields.io/badge/Get_Testnet_ETH-Coinbase_Faucet-0052FF?style=for-the-badge&logo=coinbase)](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet)
 
 </div>
 

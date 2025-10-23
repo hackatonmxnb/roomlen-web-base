@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/lib/WalletProvider';
-import { lenderReceiptNftAddress, wmxnbAddress, escrowAddress } from '@/lib/contractAddresses';
+import { lenderReceiptNftAddress, USDC_ADDRESS, escrowAddress } from '@/lib/contractAddresses';
 import { ethers } from 'ethers';
-import TinyEscrowABI from '@/lib/abi/TinyEscrow.json';
+import SecondaryMarketV2ABI from '@/lib/abi/SecondaryMarketV2.json';
 
-// Required ABIs
 const ERC721_ABI = [
   'function approve(address to, uint256 tokenId) external',
   'function getApproved(uint256 tokenId) external view returns (address)',
@@ -46,6 +45,12 @@ interface MyTRR {
   remainingMonths: number;
 }
 
+// Helper to format addresses
+const formatAddress = (address: string) => {
+  if (!address || address.length < 10) return address;
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
 export function SecondaryMarketTab() {
   const [view, setView] = useState<'listings' | 'my-nfts'>('listings');
   const [listings, setListings] = useState<TRRListing[]>([]);
@@ -64,12 +69,12 @@ export function SecondaryMarketTab() {
 
   const fetchMarketData = async () => {
     // TODO: Implement real blockchain fetch
-    // Example mock data
+    // Example mock data with valid Ethereum addresses
     setListings([
       {
         id: '1',
         tokenId: '1',
-        seller: '0x1234...5678',
+        seller: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // Valid test address
         askPrice: '42000',
         suggestedPrice: '40950',
         timestamp: Date.now(),
@@ -86,7 +91,7 @@ export function SecondaryMarketTab() {
       {
         id: '3',
         tokenId: '3',
-        seller: '0xabcd...efgh',
+        seller: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC', // Valid test address
         askPrice: '28000',
         suggestedPrice: '27300',
         timestamp: Date.now(),
@@ -126,29 +131,26 @@ export function SecondaryMarketTab() {
     setLoading(true);
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-
-      // Convert price to wei (assuming price is in whole wMXNB)
-      const priceInWei = ethers.parseEther(price);
+      const signer = await provider.getSigner(account);
 
       // Contracts
-      const wmxnb = new ethers.Contract(wmxnbAddress, ERC20_ABI, signer);
-      const escrow = new ethers.Contract(escrowAddress, TinyEscrowABI, signer);
+      const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
+      const secondaryMarket = new ethers.Contract(escrowAddress, SecondaryMarketV2ABI, signer);
 
-      console.log('Step 1: Approving wMXNB...');
-      const approveTx = await wmxnb.approve(escrowAddress, priceInWei);
+      // Get listing details to know exact price
+      console.log('Fetching listing details for token #' + tokenId);
+      const listingDetails = await secondaryMarket.getListingDetails(tokenId);
+      const actualPrice = listingDetails.listing.askPrice;
+
+      console.log('Step 1: Approving USDC...');
+      const approveTx = await usdc.approve(escrowAddress, actualPrice);
       await approveTx.wait();
-      console.log('✅ wMXNB approved');
+      console.log('✅ USDC approved');
 
-      console.log('Step 2: Executing trade...');
-      const tradeTx = await escrow.trade(
-        tokenId,
-        seller,
-        account, // buyer
-        priceInWei
-      );
-      await tradeTx.wait();
-      console.log('✅ Trade completed!');
+      console.log('Step 2: Buying receipt...');
+      const buyTx = await secondaryMarket.buyReceipt(tokenId);
+      await buyTx.wait();
+      console.log('✅ Purchase completed!');
 
       alert('Purchase successful! 🎉 You now own TRR #' + tokenId);
       fetchMarketData();
@@ -169,21 +171,24 @@ export function SecondaryMarketTab() {
     setLoading(true);
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      const signer = await provider.getSigner(account);
 
       const trrNFT = new ethers.Contract(lenderReceiptNftAddress, ERC721_ABI, signer);
+      const secondaryMarket = new ethers.Contract(escrowAddress, SecondaryMarketV2ABI, signer);
 
-      console.log('Step 1: Approving NFT to escrow...');
+      const priceInWei = ethers.parseUnits(price, 6);
+
+      console.log('Step 1: Approving NFT to SecondaryMarket...');
       const approveTx = await trrNFT.approve(escrowAddress, tokenId);
       await approveTx.wait();
-      console.log('✅ NFT approved to escrow');
+      console.log('✅ NFT approved');
 
-      // Here you should save the listing to your database
-      // For now we just show confirmation
-      console.log('Step 2: Saving listing to database...');
-      // TODO: await saveListingToDatabase(tokenId, account, price);
+      console.log('Step 2: Listing receipt on marketplace...');
+      const listTx = await secondaryMarket.listReceipt(tokenId, priceInWei);
+      await listTx.wait();
+      console.log('✅ Listed on chain!');
 
-      alert(`Listed successfully! 🏷️\n\nTRR #${tokenId} is now for sale at ${price} wMXNB\n\nBuyers can now purchase it through the marketplace.`);
+      alert(`Listed successfully! 🏷️\n\nTRR #${tokenId} is now for sale at ${price} USDC\n\nBuyers can now purchase it through the marketplace.`);
       fetchMyTRRs();
     } catch (error: any) {
       console.error('Error listing TRR:', error);
@@ -265,6 +270,9 @@ export function SecondaryMarketTab() {
                       </h4>
                       <p className="text-xs text-slate-600">
                         {listing.loanDetails.property}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Seller: {formatAddress(listing.seller)}
                       </p>
                     </div>
                     <span className="px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-semibold">
@@ -386,7 +394,7 @@ function SellTRRCard({ nft, onList, loading }: { nft: MyTRR; onList: (tokenId: s
         <div className="space-y-2">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Sale Price (wMXNB)
+              Sale Price (USDC)
             </label>
             <input
               type="number"

@@ -5,9 +5,9 @@ import { ethers } from 'ethers';
 import { useWallet } from '@/lib/WalletProvider';
 import WalletConnect from '@/components/WalletConnect';
 import { marketplaceApi } from '@/lib/api/roomfi';
-import VRA_NFT_ABI from '@/lib/abi/VerifiableRentalAgreementNFT.json';
-import LENDING_PROTOCOL_ABI from '@/lib/abi/LendingProtocol.json';
-import { lendingProtocolAddress, rentalNftAddress as VRA_NFT_ADDRESS } from '@/lib/contractAddresses';
+import VRA_NFT_ABI from '@/lib/abi/VerifiableRentalAgreementNFTV2.json';
+import LENDING_PROTOCOL_ABI from '@/lib/abi/LendingProtocolV2.json';
+import { lendingProtocolAddress, rentalNftAddress as VRA_NFT_ADDRESS, USDC_ADDRESS } from '@/lib/contractAddresses';
 import { HelpTooltip, OWNER_TERMS } from '@/components/owner/HelpTooltip';
 
 type TLeaseStatus = 'Not Tokenized' | 'Tokenized' | 'Escrow Active';
@@ -34,10 +34,10 @@ const Header = () => (
                 <img src="/roomlenlogo.png" alt="RoomLen Logo" className="h-14 w-auto" />
             </a>
             <div className="flex items-center gap-4">
-                {/* Polkadot Badge */}
+                {/* Base Badge */}
                 <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg ring-1 ring-slate-200">
-                    <img src="/polkadot_logo.png" alt="Polkadot" className="h-5 w-auto" />
-                    <span className="text-xs font-semibold text-slate-700">Paseo Testnet</span>
+                    <img src="/base_square.png" alt="Base" className="h-5 w-auto" />
+                    <span className="text-xs font-semibold text-slate-700">Base Sepolia</span>
                 </div>
                 <div className="text-right hidden sm:block">
                     <div className="font-bold text-slate-800 flex items-center gap-2">
@@ -106,7 +106,7 @@ const PropertiesCard = ({ leases, onGetAdvance }: { leases: Lease[], onGetAdvanc
                                 </span>
                                 {lease.publishedTxHash && (
                                     <a
-                                        href={`https://blockscout-passet-hub.parity-testnet.parity.io/tx/${lease.publishedTxHash}`}
+                                        href={`https://sepolia.basescan.org/tx/${lease.publishedTxHash}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="btn-sm bg-slate-600 text-white hover:bg-slate-700"
@@ -151,7 +151,7 @@ const DemoPropertiesCard = ({ leases, onTokenize }: { leases: Lease[], onTokeniz
                         <HelpTooltip {...OWNER_TERMS.nft} />
                     </div>
                     <p className="text-sm text-slate-700 leading-relaxed">
-                        Click <strong>"Tokenize"</strong> to convert your rental contract into a digital NFT on <strong>Polkadot blockchain</strong>.
+                        Click <strong>"Tokenize"</strong> to convert your rental contract into a digital NFT on <strong>Base blockchain</strong>.
                         This enables you to request cash advances!
                     </p>
                 </div>
@@ -184,11 +184,11 @@ const DemoPropertiesCard = ({ leases, onTokenize }: { leases: Lease[], onTokeniz
         </div>
 
         {/* Blockchain Info */}
-        <div className="mt-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+        <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
             <div className="flex items-center gap-2 text-sm">
-                <img src="/polkadot_logo.png" alt="Polkadot" className="h-4 w-auto" />
-                <span className="font-semibold text-purple-900">On-chain on Polkadot Paseo Testnet</span>
-                <HelpTooltip {...OWNER_TERMS.paseo} />
+                <img src="/base_square.png" alt="Base" className="h-5 w-auto" />
+                <span className="font-semibold text-blue-900">On-chain on Base Sepolia Testnet</span>
+                <HelpTooltip {...OWNER_TERMS.baseSepolia} />
             </div>
         </div>
     </section>
@@ -675,12 +675,17 @@ export default function OwnerDashboardPage() {
         try {
             const contract = new ethers.Contract(VRA_NFT_ADDRESS, VRA_NFT_ABI, signer);
             const rentAmount = ethers.parseUnits(tokenizeFlow.lease.rent.toString(), 18);
-            
-            // Arguments for the new mint function signature
+
+            // Arguments for the V2 mint function signature
             const agreementId = Math.floor(Math.random() * 100000); // Using a random ID for demo
             const propertyName = tokenizeFlow.lease.property;
             const location = tokenizeFlow.lease.location;
             const termMonths = tokenizeFlow.lease.termMonths;
+
+            // V2 additional parameters
+            const rentCurrency = USDC_ADDRESS; // USDC on Base Sepolia
+            const startDate = Math.floor(Date.now() / 1000); // Current timestamp
+            const endDate = startDate + (termMonths * 30 * 24 * 60 * 60); // End date based on term
 
             const tx = await contract.mint(
                 account,
@@ -689,9 +694,12 @@ export default function OwnerDashboardPage() {
                 termMonths,
                 tenantScore,
                 propertyName,
-                location
+                location,
+                rentCurrency,
+                startDate,
+                endDate
             );
-            
+
             setTxInfo({ hash: tx.hash });
             showToast("Tokenization transaction sent!");
             await tx.wait();
@@ -712,19 +720,29 @@ export default function OwnerDashboardPage() {
             
             // Create marketplace listing
             try {
-                const listingResponse = await marketplaceApi.createListing(account, {
-                    property_id: nftId,
-                    requested_amount: tokenizedLease.rent * tokenizedLease.termMonths * 0.8, // 80% of total rent
-                    monthly_rent: tokenizedLease.rent,
+                const listingData = {
+                    property_id: Number(nftId),
+                    requested_amount: Math.floor(tokenizedLease.rent * tokenizedLease.termMonths * 0.8), // 80% of total rent
+                    monthly_rent: Math.floor(tokenizedLease.rent),
                     term_months: tokenizedLease.termMonths,
                     purpose: "Property investment"
-                });
-                
+                };
+
+                console.log("Creating marketplace listing with data:", listingData);
+
+                const listingResponse = await marketplaceApi.createListing(account, listingData);
+
+                console.log("Marketplace listing response:", listingResponse);
+
                 if (listingResponse.success) {
                     showToast("Property listed on marketplace!");
                 }
             } catch (apiError: any) {
                 console.error("Failed to create marketplace listing:", apiError);
+                if (apiError.statusCode) {
+                    console.error("Status code:", apiError.statusCode);
+                    console.error("Response body:", apiError.responseBody);
+                }
                 showToast("Warning: Tokenized but marketplace listing failed");
             }
             
@@ -820,7 +838,7 @@ export default function OwnerDashboardPage() {
                             { (txInfo.hash || txInfo.error) && (
                                 <div className={`mt-6 p-4 rounded-xl ${txInfo.hash ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
                                     <p className="font-semibold">{txInfo.hash ? 'Transaction Sent!' : 'Error'}</p>
-                                    {txInfo.hash ? <a href={`https://blockscout-passet-hub.parity-testnet.parity.io/tx/${txInfo.hash}`} target="_blank" rel="noopener noreferrer" className="text-sm break-all underline">View on Explorer: {txInfo.hash}</a> : <p className="text-sm">{txInfo.error}</p>}
+                                    {txInfo.hash ? <a href={`https://sepolia.basescan.org/tx/${txInfo.hash}`} target="_blank" rel="noopener noreferrer" className="text-sm break-all underline">View on BaseScan: {txInfo.hash}</a> : <p className="text-sm">{txInfo.error}</p>}
                                 </div>
                             )}
                         </div>

@@ -1,13 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import { useAccount, useDisconnect, useConnect, useConnectors, useWalletClient, useChainId, useSwitchChain } from 'wagmi';
 import { ethers } from 'ethers';
 import { WalletModal, WalletType } from '@/components/WalletModal';
 
 // --- Contract and Network Information ---
-const WMXNB_ADDRESS = '0xf8bB2Ce2643f89e6B80fDaC94483cDA91110d95a';
-const WMXNB_ABI = ['function balanceOf(address) view returns (uint256)'];
-const PASEO_NETWORK_ID = '420420422';
+const USDC_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+const USDC_ABI = ['function balanceOf(address) view returns (uint256)'];
+const BASE_SEPOLIA_NETWORK_ID = '84532';
+const BASE_SEPOLIA_CHAIN_ID = 84532;
 
 // --- Context State Definition ---
 interface WalletState {
@@ -17,106 +19,172 @@ interface WalletState {
   isConnected: boolean;
   connectWallet: () => void;
   disconnectWallet: () => void;
-  isPaseoNetwork: boolean;
-  wMxnbBalance: string | null;
+  switchToBaseSepolia: () => Promise<void>;
+  isBaseSepoliaNetwork: boolean;
+  usdcBalance: string | null;
 }
 
 const WalletContext = createContext<WalletState | undefined>(undefined);
 
 // --- Provider Component ---
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
-  const [account, setAccount] = useState<string | null>(null);
+  const { address, isConnected: wagmiConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { connect } = useConnect();
+  const { switchChain } = useSwitchChain();
+  const connectors = useConnectors();
+  const chainId = useChainId();
+  const { data: walletClient } = useWalletClient();
+
   const [signer, setSigner] = useState<ethers.Signer | null>(null);
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
-  const [isPaseoNetwork, setIsPaseoNetwork] = useState<boolean>(false);
+  const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [wMxnbBalance, setWMxnbBalance] = useState<string | null>(null);
+
+  const isBaseSepoliaNetwork = chainId?.toString() === BASE_SEPOLIA_NETWORK_ID;
 
   // --- Balance Logic ---
   const updateBalance = async (accountAddress: string, prov: ethers.BrowserProvider) => {
     try {
-      const tokenContract = new ethers.Contract(WMXNB_ADDRESS, WMXNB_ABI, prov);
+      const tokenContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, prov);
       const balance = await tokenContract.balanceOf(accountAddress);
-      const formattedBalance = parseFloat(ethers.formatUnits(balance, 18)).toFixed(2);
-      setWMxnbBalance(formattedBalance);
+      const formattedBalance = parseFloat(ethers.formatUnits(balance, 6)).toFixed(2);
+      setUsdcBalance(formattedBalance);
     } catch (e) {
-      console.error("Failed to fetch wMXNB balance:", e);
-      setWMxnbBalance(null);
+      console.error("Failed to fetch USDC balance:", e);
+      setUsdcBalance(null);
     }
   };
 
-  // --- Connection Logic ---
-  const resetState = () => {
-    setAccount(null);
-    setSigner(null);
-    setProvider(null);
-    setIsPaseoNetwork(false);
-    setWMxnbBalance(null);
-  };
+  // Setup provider and signer when wallet is connected
+  useEffect(() => {
+    const setupProviderAndSigner = async () => {
+      if (wagmiConnected && walletClient && address) {
+        try {
+          // Create provider from wallet client
+          const browserProvider = new ethers.BrowserProvider(walletClient as any);
+          const ethersSigner = await browserProvider.getSigner(address);
+
+          setProvider(browserProvider);
+          setSigner(ethersSigner);
+
+          // Update USDC balance
+          await updateBalance(address, browserProvider);
+        } catch (error) {
+          console.error('Error setting up provider:', error);
+        }
+      } else {
+        setProvider(null);
+        setSigner(null);
+        setUsdcBalance(null);
+      }
+    };
+
+    setupProviderAndSigner();
+  }, [wagmiConnected, walletClient, address]);
 
   const connectWallet = () => setIsModalOpen(true);
 
   const disconnectWallet = () => {
-    resetState();
-    localStorage.removeItem('walletType');
+    disconnect();
+    setProvider(null);
+    setSigner(null);
+    setUsdcBalance(null);
+  };
+
+  const switchToBaseSepolia = async () => {
+    try {
+      if (switchChain) {
+        await switchChain({ chainId: BASE_SEPOLIA_CHAIN_ID });
+      } else if (typeof window !== 'undefined' && (window as any).ethereum) {
+        // Fallback for older wallets
+        await (window as any).ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x14a34' }], // 84532 in hex
+        });
+      }
+    } catch (error: any) {
+      // If network doesn't exist, add it
+      if (error.code === 4902 || error.code === -32603) {
+        try {
+          await (window as any).ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x14a34',
+              chainName: 'Base Sepolia',
+              nativeCurrency: {
+                name: 'ETH',
+                symbol: 'ETH',
+                decimals: 18
+              },
+              rpcUrls: ['https://sepolia.base.org'],
+              blockExplorerUrls: ['https://sepolia.basescan.org']
+            }]
+          });
+        } catch (addError) {
+          console.error('Error adding Base Sepolia network:', addError);
+          throw addError;
+        }
+      } else {
+        throw error;
+      }
+    }
   };
 
   const initiateConnection = async (walletType: WalletType) => {
-    let walletProvider: any;
-    if (walletType === 'metamask') walletProvider = window.ethereum;
-    else if (walletType === 'subwallet') walletProvider = window.SubWallet;
-
-    if (!walletProvider) {
-      alert(`Could not find ${walletType}. Please make sure it's installed.`);
-      return;
-    }
-
     try {
-      const browserProvider = new ethers.BrowserProvider(walletProvider);
-      const accounts = await browserProvider.send('eth_requestAccounts', []);
-      const currentSigner = await browserProvider.getSigner();
-      const network = await browserProvider.getNetwork();
-      const currentAccount = accounts[0];
+      let connector;
 
-      setProvider(browserProvider);
-      setSigner(currentSigner);
-      setAccount(currentAccount);
-      setIsPaseoNetwork(network.chainId.toString() === PASEO_NETWORK_ID);
-      
-      await updateBalance(currentAccount, browserProvider);
-      
-      localStorage.setItem('walletType', walletType);
+      if (walletType === 'metamask') {
+        // Try to find MetaMask connector (injected)
+        connector = connectors.find((c) => c.id === 'injected' || c.name === 'MetaMask');
+
+        if (!connector && typeof window !== 'undefined' && (window as any).ethereum) {
+          // If connector not found but MetaMask is available, use the first injected connector
+          connector = connectors.find((c) => c.id === 'injected');
+        }
+      } else if (walletType === 'coinbase') {
+        connector = connectors.find((c) => c.id === 'coinbaseWalletSDK');
+      }
+
+      if (!connector) {
+        if (walletType === 'metamask') {
+          alert('MetaMask not detected. Please install MetaMask extension.');
+          window.open('https://metamask.io/download/', '_blank');
+        } else {
+          alert('Connector not found. Please refresh the page.');
+        }
+        return;
+      }
+
+      await connect({ connector });
+
+      // After connection, switch to Base Sepolia if needed
+      setTimeout(async () => {
+        const currentChainId = await (window as any).ethereum?.request({ method: 'eth_chainId' });
+        if (currentChainId !== '0x14a34') {
+          await switchToBaseSepolia();
+        }
+      }, 500);
+
+      setIsModalOpen(false);
     } catch (error) {
       console.error(`Error connecting to ${walletType}:`, error);
-      resetState();
+      alert(`Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
-  // --- Wallet Event Handling ---
-  useEffect(() => {
-    const provider = window.ethereum || window.SubWallet;
-    if (!provider) return;
-
-    const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length === 0) {
-        disconnectWallet();
-      } else if (accounts[0] !== account) {
-        const lastUsedWallet = localStorage.getItem('walletType') as WalletType;
-        if (lastUsedWallet) initiateConnection(lastUsedWallet);
-      }
-    };
-    const handleChainChanged = () => window.location.reload();
-
-    provider.on('accountsChanged', handleAccountsChanged);
-    provider.on('chainChanged', handleChainChanged);
-
-    return () => {
-      provider.removeListener('accountsChanged', handleAccountsChanged);
-      provider.removeListener('chainChanged', handleChainChanged);
-    };
-  }, [account]);
-
-  const value = { account, signer, provider, isConnected: !!account, connectWallet, disconnectWallet, isPaseoNetwork, wMxnbBalance };
+  const value: WalletState = {
+    account: address || null,
+    signer,
+    provider,
+    isConnected: wagmiConnected,
+    connectWallet,
+    disconnectWallet,
+    switchToBaseSepolia,
+    isBaseSepoliaNetwork,
+    usdcBalance,
+  };
 
   return (
     <WalletContext.Provider value={value}>
@@ -126,16 +194,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// --- Hook and Global Types ---
+// --- Hook ---
 export const useWallet = () => {
   const context = useContext(WalletContext);
   if (context === undefined) throw new Error('useWallet must be used within a WalletProvider');
   return context;
 };
-
-declare global {
-  interface Window {
-    ethereum?: any;
-    SubWallet?: any;
-  }
-}

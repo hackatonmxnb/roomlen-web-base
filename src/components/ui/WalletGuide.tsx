@@ -51,8 +51,8 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
       )
     },
     {
-      title: "Add Paseo Network",
-      description: "RoomLen runs on Polkadot's Paseo network. It's free and secure. Click the button to add the network automatically.",
+      title: "Add Base Sepolia Network",
+      description: "RoomLen runs on Base Sepolia network. It's free and secure. Click the button to add the network automatically.",
       icon: "🌐",
       iconType: "emoji",
       action: (
@@ -70,12 +70,12 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
                   chainId: `0x${CHAIN_ID.toString(16)}`,
                   chainName: CHAIN_NAME,
                   nativeCurrency: {
-                    name: 'PAS',
-                    symbol: 'PAS',
+                    name: 'ETH',
+                    symbol: 'ETH',
                     decimals: 18
                   },
                   rpcUrls: [RPC_URL],
-                  blockExplorerUrls: ['https://blockscout-passet-hub.parity-testnet.parity.io']
+                  blockExplorerUrls: ['https://sepolia.basescan.org']
                 }]
               });
 
@@ -88,28 +88,28 @@ export function WalletGuide({ onClose, buttonRef }: WalletGuideProps) {
           }}
           className="btn bg-blue-600 hover:bg-blue-700 text-white w-full"
         >
-          ✨ Add Paseo Network (1 click)
+          ✨ Add Base Sepolia Network (1 click)
         </button>
       )
     },
     {
-      title: "Get Free PAS Tokens",
-      description: "You need PAS tokens to pay for transactions. They're FREE and only for testing. They have no real value.",
+      title: "Get Free ETH Tokens",
+      description: "You need ETH tokens to pay for transactions. They're FREE and only for testing on Base Sepolia. They have no real value.",
       icon: "💰",
       iconType: "emoji",
       action: (
         <div className="space-y-3">
           <a
-            href="https://faucet.polkadot.io/?parachain=1111"
+            href="https://www.coinbase.com/faucets/base-ethereum-goerli-faucet"
             target="_blank"
             rel="noopener noreferrer"
             className="btn bg-purple-600 hover:bg-purple-700 text-white w-full"
           >
-            Get Free PAS →
+            Get Free ETH →
           </a>
           <p className="text-xs text-slate-500 text-center">
             1. Copy your wallet address<br />
-            2. Paste it in the faucet<br />
+            2. Paste it in the Base faucet<br />
             3. Wait 30 seconds ⏱️
           </p>
         </div>

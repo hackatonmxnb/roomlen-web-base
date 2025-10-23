@@ -68,7 +68,7 @@ export function OfferGrid({ offers, onOpen }: OfferGridProps) {
 
           {/* Chain Badge */}
           <div className="mb-4 flex items-center gap-2 text-xs">
-            <img src="/polkadot_logo.png" alt="Polkadot" className="h-4 w-auto" />
+            <img src="/base_basemark_blue.png" alt="Polkadot" className="h-4 w-auto" />
             <span className="font-semibold text-slate-600">{o.chain}</span>
           </div>
 

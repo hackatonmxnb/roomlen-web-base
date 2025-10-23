@@ -97,16 +97,16 @@ export function HelpTooltip({ term, explanation, example, blockchainIntegration 
 
             {/* Blockchain Integration */}
             {blockchainIntegration && (
-              <div className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+              <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                 <div className="flex items-center gap-2 mb-2">
                   <img
-                    src="/polkadot_logo.png"
-                    alt="Polkadot"
+                    src="/Base_basemark_blue.png"
+                    alt="Base"
                     className="h-4 w-auto"
                   />
-                  <div className="text-xs font-semibold text-purple-900">On Polkadot:</div>
+                  <div className="text-xs font-semibold text-blue-900">On Base:</div>
                 </div>
-                <div className="text-xs text-purple-800 leading-relaxed">{blockchainIntegration}</div>
+                <div className="text-xs text-blue-800 leading-relaxed">{blockchainIntegration}</div>
               </div>
             )}
           </div>
@@ -138,13 +138,13 @@ export const OWNER_TERMS = {
     term: "Tokenize",
     explanation: "Converting your rental contract into a digital asset (NFT) that lives on the blockchain. This makes it verifiable, tradeable, and usable as collateral.",
     example: "Your rental contract becomes NFT #1234, which you can use to request advances or sell on a marketplace.",
-    blockchainIntegration: "We create an ERC-721 NFT on Polkadot's Paseo Testnet that stores your rental agreement details (rent amount, term, tenant score) permanently on-chain."
+    blockchainIntegration: "We create an ERC-721 NFT on Base's Base Sepolia that stores your rental agreement details (rent amount, term, tenant score) permanently on-chain."
   },
   advance: {
     term: "Advance",
     explanation: "Immediate cash you receive today in exchange for your future rent payments. Instead of waiting months for rent, get 80-90% upfront.",
     example: "If your tenant pays $10,000/month for 12 months, you can receive ~$92,000 today instead of waiting 12 months.",
-    blockchainIntegration: "When an investor funds your request, a smart contract on Polkadot transfers wMXNB tokens to your wallet instantly and automatically."
+    blockchainIntegration: "When an investor funds your request, a smart contract on Base transfers wMXNB tokens to your wallet instantly and automatically."
   },
   riskTier: {
     term: "Risk Tier",
@@ -156,7 +156,7 @@ export const OWNER_TERMS = {
     term: "Haircut",
     explanation: "A safety buffer (discount) applied to protect investors from risk. The percentage deducted from your total rent value before calculating the advance.",
     example: "With a 10% haircut on $120,000 total rent: $120,000 - 10% = $108,000 is used for your advance calculation.",
-    blockchainIntegration: "Haircut percentage is stored in the risk tier parameters on Polkadot and automatically applied by the smart contract when calculating loan amounts."
+    blockchainIntegration: "Haircut percentage is stored in the risk tier parameters on Base and automatically applied by the smart contract when calculating loan amounts."
   },
   oc: {
     term: "Over-Collateral (OC)",
@@ -168,24 +168,24 @@ export const OWNER_TERMS = {
     term: "Marketplace",
     explanation: "Where investors browse and fund advance requests. Once you publish, investors can see your property details and choose to fund you.",
     example: "Your tokenized property appears in the marketplace with details: $92,000 advance, 15% APR, Tier A, 12-month term.",
-    blockchainIntegration: "Publishing creates a loan request transaction on Polkadot that emits a LoanRequested event. Investors monitor these events to find opportunities."
+    blockchainIntegration: "Publishing creates a loan request transaction on Base that emits a LoanRequested event. Investors monitor these events to find opportunities."
   },
   nft: {
     term: "NFT (Digital Certificate)",
     explanation: "A unique digital token that proves you own the rental agreement. It's like a digital deed that can't be copied or faked.",
     example: "Your NFT #5678 contains: Property address, $10k/month rent, 12-month term, tenant score 85.",
-    blockchainIntegration: "Your NFT is minted on Polkadot using the ERC-721 standard. View it on Blockscout explorer and trade it on Kodadot NFT marketplace."
+    blockchainIntegration: "Your NFT is minted on Base using the ERC-721 standard. View it on BaseScan explorer and trade it on OpenSea NFT marketplace."
   },
-  paseo: {
-    term: "Paseo Testnet",
-    explanation: "A test version of Polkadot blockchain where we safely demonstrate RoomLen without using real money. Perfect for this hackathon!",
-    example: "PAS tokens are free test tokens with no real value, allowing you to try everything risk-free.",
-    blockchainIntegration: "All RoomLen contracts are deployed on Paseo (Chain ID: 420420422). Transactions are instant, free, and fully transparent on Blockscout explorer."
+  baseSepolia: {
+    term: "Base Sepolia",
+    explanation: "A test version of Base blockchain where we safely demonstrate RoomLen without using real money. Perfect for this hackathon!",
+    example: "ETH tokens are free test tokens with no real value, allowing you to try everything risk-free.",
+    blockchainIntegration: "All RoomLen contracts are deployed on Base Sepolia (Chain ID: 84532). Transactions are instant, free, and fully transparent on BaseScan explorer."
   },
   explorer: {
     term: "Block Explorer",
     explanation: "A website where you can see all blockchain transactions in real-time. It's like a public ledger anyone can verify.",
     example: "Click 'View on Explorer' to see your tokenization transaction, who created it, when, and all the details.",
-    blockchainIntegration: "We use Blockscout for Paseo Testnet. Every tokenization, loan request, and payment is permanently recorded and verifiable."
+    blockchainIntegration: "We use BaseScan for Base Sepolia. Every tokenization, loan request, and payment is permanently recorded and verifiable."
   }
 };

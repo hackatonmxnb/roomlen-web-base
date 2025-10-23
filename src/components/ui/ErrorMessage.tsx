@@ -18,8 +18,8 @@ const FRIENDLY_ERRORS: Record<string, { title: string; message: string; action?:
   },
   'insufficient funds': {
     title: 'Insufficient Funds',
-    message: 'You don\'t have enough PAS tokens to pay for this transaction.',
-    action: 'Get free tokens from the Polkadot faucet'
+    message: 'You don\'t have enough ETH tokens to pay for this transaction.',
+    action: 'Get free tokens from the Base faucet'
   },
   'network': {
     title: 'Connection Error',
@@ -38,8 +38,8 @@ const FRIENDLY_ERRORS: Record<string, { title: string; message: string; action?:
   },
   'gas': {
     title: 'Out of Gas',
-    message: 'You need PAS tokens to pay for the transaction. It\'s like gas to make it work.',
-    action: 'Get free PAS from the faucet'
+    message: 'You need ETH tokens to pay for the transaction. It\'s like gas to make it work.',
+    action: 'Get free ETH from the Base faucet'
   },
   'timeout': {
     title: 'Slow Transaction',

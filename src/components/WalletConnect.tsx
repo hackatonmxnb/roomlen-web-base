@@ -4,14 +4,15 @@ import { useWallet } from "@/lib/WalletProvider";
 import React, { useState } from "react";
 import { WalletGuide, WalletHelpButton } from "./ui/WalletGuide";
 import { CHAIN_ID, RPC_URL, CHAIN_NAME } from '@/lib/contractAddresses';
+import { BasenameDisplay } from "./ui/BasenameDisplay";
 
 const WalletConnect = () => {
-  const { account, isConnected, connectWallet, disconnectWallet, wMxnbBalance, isPaseoNetwork } = useWallet();
+  const { account, isConnected, connectWallet, disconnectWallet, switchToBaseSepolia, usdcBalance, isBaseSepoliaNetwork } = useWallet();
   const [showGuide, setShowGuide] = useState(false);
   const [isAddingNetwork, setIsAddingNetwork] = useState(false);
   const buttonContainerRef = React.useRef<HTMLDivElement>(null);
 
-  const handleAddPaseoNetwork = async () => {
+  const handleAddBaseSepoliaNetwork = async () => {
     if (!window.ethereum) {
       setShowGuide(true);
       return;
@@ -19,28 +20,14 @@ const WalletConnect = () => {
 
     setIsAddingNetwork(true);
     try {
-      await (window.ethereum as any).request({
-        method: 'wallet_addEthereumChain',
-        params: [{
-          chainId: `0x${CHAIN_ID.toString(16)}`,
-          chainName: CHAIN_NAME,
-          nativeCurrency: {
-            name: 'PAS',
-            symbol: 'PAS',
-            decimals: 18
-          },
-          rpcUrls: [RPC_URL],
-          blockExplorerUrls: ['https://blockscout-passet-hub.parity-testnet.parity.io']
-        }]
-      });
-
-      alert('Paseo Network added successfully! 🎉 Now connect your wallet.');
+      await switchToBaseSepolia();
+      alert('Switched to Base Sepolia Network successfully! 🎉');
     } catch (error: any) {
-      console.error('Error adding network:', error);
+      console.error('Error switching network:', error);
       if (error.code === 4902) {
-        alert('Network added. Please select "Paseo Testnet" in your wallet.');
+        alert('Network added. Please select "Base Sepolia" in your wallet.');
       } else {
-        alert(`Could not add network: ${error.message}`);
+        alert(`Could not switch network: ${error.message}`);
       }
     } finally {
       setIsAddingNetwork(false);
@@ -50,28 +37,28 @@ const WalletConnect = () => {
   if (isConnected && account) {
     return (
       <div className="flex items-center gap-2">
-        {!isPaseoNetwork && (
+        {!isBaseSepoliaNetwork && (
           <div className="flex items-center gap-2">
             <div className="px-3 py-2 text-xs font-bold text-yellow-800 bg-yellow-100 rounded-xl flex items-center gap-2">
               <span>⚠️</span>
               <span>Wrong Network</span>
             </div>
             <button
-              onClick={handleAddPaseoNetwork}
+              onClick={handleAddBaseSepoliaNetwork}
               disabled={isAddingNetwork}
               className="px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition disabled:opacity-50"
             >
-              {isAddingNetwork ? 'Adding...' : 'Switch to Paseo'}
+              {isAddingNetwork ? 'Adding...' : 'Switch to Base Sepolia'}
             </button>
           </div>
         )}
-        {wMxnbBalance !== null && (
+        {usdcBalance !== null && (
           <div className="px-3 py-2 text-sm font-semibold text-green-700 bg-green-50 rounded-xl border border-green-200">
-            💰 {parseFloat(wMxnbBalance).toFixed(2)} wMXNB
+            💰 {parseFloat(usdcBalance).toFixed(2)} USDC
           </div>
         )}
         <div className="px-3 py-2 text-sm font-semibold text-slate-700 bg-slate-100 rounded-xl">
-          {`${account.substring(0, 6)}...${account.substring(account.length - 4)}`}
+          <BasenameDisplay address={account} />
         </div>
         <button
           onClick={disconnectWallet}

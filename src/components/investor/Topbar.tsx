@@ -52,10 +52,10 @@ export function Topbar({ tab, onTab }: TopbarProps) {
         </nav>
 
         <div className="flex items-center gap-4">
-          {/* Polkadot Badge */}
+          {/* Base Badge */}
           <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg ring-1 ring-slate-200">
-            <img src="/polkadot_logo.png" alt="Polkadot" className="h-5 w-auto" />
-            <span className="text-xs font-semibold text-slate-700">Paseo Testnet</span>
+            <img src="/base_square.png" alt="Base" className="h-5 w-auto" />
+            <span className="text-xs font-semibold text-slate-700">Base Sepolia</span>
           </div>
 
           <div className="text-right hidden sm:block">

@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { WalletProvider } from "@/lib/WalletProvider"; // Importa el proveedor
+import { OnchainProviders } from "@/lib/OnchainProviders";
+import { WalletProvider } from "@/lib/WalletProvider";
+// import '@coinbase/onchainkit/styles.css'; // Commented out due to Tailwind v4 conflict
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "RoomLen - Rent-backed Advances for Property Owners",
-  description: "Unlock liquidity from rental agreements. Get 80-90% of future rent upfront through DeFi. Tokenized leases, instant advances, risk-based pricing on Polkadot.",
-  keywords: ["DeFi", "Rent", "NFT", "Lending", "Polkadot", "Real Estate", "LATAM", "Property", "Liquidity", "Smart Contracts"],
+  description: "Unlock liquidity from rental agreements. Get 80-90% of future rent upfront through DeFi. Tokenized leases, instant advances, risk-based pricing on Base.",
+  keywords: ["DeFi", "Rent", "NFT", "Lending", "Base", "Real Estate", "LATAM", "Property", "Liquidity", "Smart Contracts"],
   authors: [{ name: "RoomLen Team" }],
   creator: "RoomLen",
   publisher: "RoomLen",
@@ -17,11 +19,11 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://roomlen.io",
     title: "RoomLen - Rent-backed Advances Platform",
-    description: "Convert signed leases into instant capital. DeFi protocol for property owners and investors on Polkadot.",
+    description: "Convert signed leases into instant capital. DeFi protocol for property owners and investors on Base.",
     siteName: "RoomLen",
     images: [
       {
-        url: "/og-image.png",
+        url: "/roomlenlogo2.png",
         width: 1200,
         height: 630,
         alt: "RoomLen - Rent-backed Advances Platform",
@@ -31,8 +33,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "RoomLen - Rent-backed Advances",
-    description: "Unlock liquidity from rental agreements through DeFi on Polkadot",
-    images: ["/og-image.png"],
+    description: "Unlock liquidity from rental agreements through DeFi on Base",
+    images: ["/roomlenlogo2.png"],
     creator: "@roomlen",
   },
   robots: {
@@ -40,8 +42,8 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: "/roomlenlogo.png",
+    apple: "/roomlenlogo.png",
   },
 };
 
@@ -51,9 +53,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <WalletProvider>{children}</WalletProvider> 
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
+        <OnchainProviders>
+          <WalletProvider>{children}</WalletProvider>
+        </OnchainProviders>
       </body>
     </html>
   );

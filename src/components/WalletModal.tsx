@@ -1,9 +1,10 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 
 // Define supported wallet types
-export type WalletType = 'metamask' | 'subwallet';
+export type WalletType = 'metamask' | 'coinbase';
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -19,13 +20,6 @@ const MetaMaskLogo = () => (
     <path fill="#D96B1A" d="M128 160l64-48v-64L128 0z"/>
     <path fill="#C04327" d="M64 48l64 48-32 24-64-48z"/>
     <path fill="#E2761B" d="M128 96l32 24-32 24-64-48z"/>
-  </svg>
-);
-
-const SubWalletLogo = () => (
-  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M24 0C10.745 0 0 10.745 0 24s10.745 24 24 24 24-10.745 24-24S37.255 0 24 0z" fill="#000"/>
-    <path d="M24 8c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zm0 24c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#fff"/>
   </svg>
 );
 
@@ -61,11 +55,11 @@ export const WalletModal = ({ isOpen, onClose, onConnect }: WalletModalProps) =>
             MetaMask
           </button>
           <button
-            onClick={() => handleConnect('subwallet')}
+            onClick={() => handleConnect('coinbase')}
             className="w-full flex items-center gap-4 p-4 rounded-xl text-lg font-semibold ring-1 ring-slate-200 hover:bg-slate-50 transition-all"
           >
-            <SubWalletLogo />
-            SubWallet
+            <Image src="/base_square.png" alt="Base Wallet" width={48} height={48} />
+            Base Wallet
           </button>
         </div>
 

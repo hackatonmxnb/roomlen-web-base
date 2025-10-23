@@ -596,12 +596,12 @@ function Footer(){
               <span className="text-lg">🇧🇴</span>
             </div>
 
-            {/* Powered by Polkadot */}
+            {/* Built on Base */}
             <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-xl ring-1 ring-slate-200 shadow-sm">
-              <span className="text-xs font-semibold text-slate-600">Powered by</span>
+              <span className="text-xs font-semibold text-slate-600">Built on</span>
               <img
-                src="/polkadot_logo.png"
-                alt="Polkadot"
+                src="/base_logo_blue.png"
+                alt="Base"
                 className="h-6 w-auto"
               />
             </div>

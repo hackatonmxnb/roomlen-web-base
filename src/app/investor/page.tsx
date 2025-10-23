@@ -14,38 +14,38 @@ import type { Position, Offer } from "@/lib/investor/types";
 
 // Import contract configurations
 import { lendingProtocolAddress, rentalNftAddress } from "@/lib/contractAddresses";
-import LendingProtocolABI from "@/lib/abi/LendingProtocol.json";
-import RentalNFTABI from "@/lib/abi/VerifiableRentalAgreementNFT.json";
+import LendingProtocolABI from "@/lib/abi/LendingProtocolV2.json";
+import RentalNFTABI from "@/lib/abi/VerifiableRentalAgreementNFTV2.json";
 
 // Import Viem hooks and utilities
 import { createPublicClient, http, formatUnits } from "viem";
 import { defineChain } from "viem";
 
-// Define Paseo Testnet chain
-const paseoTestnet = defineChain({
-  id: 420420422,
-  name: 'Paseo Testnet',
+// Define Base Sepolia Testnet chain
+const baseSepoliaTestnet = defineChain({
+  id: 84532,
+  name: 'Base Sepolia',
   nativeCurrency: {
-    name: 'PAS',
-    symbol: 'PAS',
+    name: 'ETH',
+    symbol: 'ETH',
     decimals: 18,
   },
   rpcUrls: {
     default: {
-      http: ['https://testnet-passet-hub-eth-rpc.polkadot.io'],
+      http: ['https://sepolia.base.org'],
     },
   },
   blockExplorers: {
     default: {
-      name: 'Blockscout',
-      url: 'https://blockscout-passet-hub.parity-testnet.parity.io',
+      name: 'BaseScan',
+      url: 'https://sepolia.basescan.org',
     },
   },
 });
 
 // Create a public client to interact with the blockchain
 const publicClient = createPublicClient({
-  chain: paseoTestnet,
+  chain: baseSepoliaTestnet,
   transport: http(),
 });
 
@@ -168,8 +168,8 @@ export default function InvestorDashboard() {
                 irrAPR: irrAPR,
                 ocPct: tier ? Number(tier.ocBps) / 100 : 0,
                 haircutPct: tier ? Number(tier.haircutBps) / 100 : 0,
-                chain: "Paseo Testnet",
-                currency: "PAS",
+                chain: "Base Sepolia",
+                currency: "USDC",
                 riskTier: String.fromCharCode(65 + riskTiers.indexOf(tier)), // A, B, C...
             }));
 

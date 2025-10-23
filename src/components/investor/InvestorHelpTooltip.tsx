@@ -89,16 +89,16 @@ export function InvestorHelpTooltip({ term, explanation, example, blockchainInte
             )}
 
             {blockchainIntegration && (
-              <div className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+              <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                 <div className="flex items-center gap-2 mb-2">
                   <img
-                    src="/polkadot_logo.png"
-                    alt="Polkadot"
+                    src="/Base_basemark_blue.png"
+                    alt="Base"
                     className="h-4 w-auto"
                   />
-                  <div className="text-xs font-semibold text-purple-900">On Polkadot:</div>
+                  <div className="text-xs font-semibold text-blue-900">On Base:</div>
                 </div>
-                <div className="text-xs text-purple-800 leading-relaxed">{blockchainIntegration}</div>
+                <div className="text-xs text-blue-800 leading-relaxed">{blockchainIntegration}</div>
               </div>
             )}
           </div>
@@ -130,7 +130,7 @@ export const INVESTOR_TERMS = {
     term: "Total Invested",
     explanation: "The total amount of capital you've deployed across all active rental property investments on the platform.",
     example: "If you funded 3 properties with $50k, $30k, and $20k advances, your total invested is $100k.",
-    blockchainIntegration: "This value is calculated by summing all your funded loan amounts stored in the LendingProtocol smart contract on Polkadot."
+    blockchainIntegration: "This value is calculated by summing all your funded loan amounts stored in the LendingProtocol smart contract on Base Sepolia."
   },
   monthlyIncome: {
     term: "Monthly Income",
@@ -154,7 +154,7 @@ export const INVESTOR_TERMS = {
     term: "Risk Tier",
     explanation: "A letter grade (A, B, C) indicating the quality and risk of the rental property. Tier A = lowest risk, best tenants.",
     example: "Tier A: Excellent tenant, always pays on time, stable income → Lower IRR but safer. Tier C: Higher risk → Higher IRR to compensate.",
-    blockchainIntegration: "Risk tier is algorithmically calculated from tenant credit score stored in the rental NFT metadata on Polkadot."
+    blockchainIntegration: "Risk tier is algorithmically calculated from tenant credit score stored in the rental NFT metadata on Base."
   },
   advance: {
     term: "Advance Amount",
@@ -184,7 +184,7 @@ export const INVESTOR_TERMS = {
     term: "TRR (Tokenized Rent Receipt)",
     explanation: "An NFT you receive when funding a property. It proves your investment and can be sold on secondary markets if you need liquidity.",
     example: "You fund Property #123 → Receive TRR NFT #123 → Can sell it on Kodadot to exit early.",
-    blockchainIntegration: "TRRs are ERC-721 NFTs minted on Polkadot when you fund a loan. Trade them on Kodadot or keep for rent streams."
+    blockchainIntegration: "TRRs are ERC-721 NFTs minted on Base when you fund a loan. Trade them on OpenSea or keep for rent streams."
   },
   termMonths: {
     term: "Term (Months)",
@@ -196,7 +196,7 @@ export const INVESTOR_TERMS = {
     term: "Marketplace",
     explanation: "Where you browse available properties to fund. Property owners list their advance requests here for investors like you.",
     example: "See 20 properties available: Filter by Tier A, 12-month term, 15%+ IRR → Choose best match for your strategy.",
-    blockchainIntegration: "Marketplace pulls live data from Polkadot blockchain. All listed properties have verified NFTs and on-chain data."
+    blockchainIntegration: "Marketplace pulls live data from Base blockchain. All listed properties have verified NFTs and on-chain data."
   },
   nextPayment: {
     term: "Next Payment",

@@ -9,7 +9,7 @@ interface TRRInfoModalProps {
 }
 
 export const TRRInfoModal = ({ position, onClose }: TRRInfoModalProps) => {
-  const kodadotUrl = `https://kodadot.xyz/paseo/gallery/${lenderReceiptNftAddress}-${position.id}`;
+  const kodadotUrl = `https://opensea.io/assets/base-sepolia/gallery/${lenderReceiptNftAddress}-${position.id}`;
   const explorerUrl = `https://blockscout-passet-hub.parity-testnet.parity.io/token/${lenderReceiptNftAddress}/instance/${position.id}`;
 
   return (
@@ -22,7 +22,7 @@ export const TRRInfoModal = ({ position, onClose }: TRRInfoModalProps) => {
         <h3 className="text-xl font-semibold text-slate-900">Your Digital Asset: TRR Token</h3>
         <p className="mt-2 text-sm text-slate-600">
           This is an NFT (Non-Fungible Token) that represents your investment in the loan for the property <strong>{position.property}</strong>.
-          It's a unique digital asset that you can transfer, sell, or use on other DeFi platforms within the Polkadot ecosystem.
+          It's a unique digital asset that you can transfer, sell, or use on other DeFi platforms within the Base ecosystem.
         </p>
 
         <div className="mt-6">

@@ -12,3 +12,21 @@ docs/
 
 # Dotenv file
 .env
+
+# Node modules (if using hardhat alongside)
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*.log
+*.tmp

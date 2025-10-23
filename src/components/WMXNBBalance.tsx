@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/lib/WalletProvider';
-import { wmxnbAddress } from '@/lib/contractAddresses';
+import { USDC_ADDRESS } from '@/lib/contractAddresses';
 import { ethers } from 'ethers';
 
-const WMXNB_ABI = [
+const USDC_ABI = [
   'function balanceOf(address account) external view returns (uint256)',
 ];
 
-export function WMXNBBalance() {
+export function USDCBalance() {
   const { account, isConnected } = useWallet();
   const [balance, setBalance] = useState<string>('0');
 
@@ -25,11 +25,11 @@ export function WMXNBBalance() {
         console.log('Balance change event received, refreshing...');
         fetchBalance();
       };
-      window.addEventListener('wmxnb-balance-changed', handleBalanceChange);
+      window.addEventListener('usdc-balance-changed', handleBalanceChange);
 
       return () => {
         clearInterval(interval);
-        window.removeEventListener('wmxnb-balance-changed', handleBalanceChange);
+        window.removeEventListener('usdc-balance-changed', handleBalanceChange);
       };
     }
   }, [isConnected, account]);
@@ -39,12 +39,12 @@ export function WMXNBBalance() {
 
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const wmxnb = new ethers.Contract(wmxnbAddress, WMXNB_ABI, provider);
-      const balanceWei = await wmxnb.balanceOf(account);
-      const balanceFormatted = ethers.formatEther(balanceWei);
-      setBalance(parseFloat(balanceFormatted).toFixed(0));
+      const usdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
+      const balanceWei = await usdc.balanceOf(account);
+      const balanceFormatted = ethers.formatUnits(balanceWei, 6);
+      setBalance(parseFloat(balanceFormatted).toFixed(2));
     } catch (error) {
-      console.error('Error fetching wMXNB balance:', error);
+      console.error('Error fetching USDC balance:', error);
       setBalance('0');
     }
   };
@@ -58,8 +58,11 @@ export function WMXNBBalance() {
       <span className="text-lg">💵</span>
       <div className="text-right">
         <div className="text-xs text-slate-600">Balance</div>
-        <div className="text-sm font-bold text-slate-900">{balance} wMXNB</div>
+        <div className="text-sm font-bold text-slate-900">{balance} USDC</div>
       </div>
     </div>
   );
 }
+
+// Keep backward compatibility
+export const WMXNBBalance = USDCBalance;

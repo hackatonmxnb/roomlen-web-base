@@ -1,0 +1,89 @@
+{
+  "network": "Base Sepolia",
+  "chainId": 84532,
+  "deployedAt": "2025-01-16T02:00:00.000Z",
+  "deployer": "0x648A0C0f284BB86dba990EcDdb3237275882dD6F",
+  "blockNumber": 32431400,
+  "contracts": {
+    "VerifiableRentalAgreementNFTV2": {
+      "address": "0x674687e09042452C0ad3D5EC06912bf4979bFC33",
+      "abi": "../abis/VerifiableRentalAgreementNFTV2.json",
+      "verified": false,
+      "explorerUrl": "https://sepolia.basescan.org/address/0x674687e09042452C0ad3D5EC06912bf4979bFC33",
+      "deploymentTx": "0xb7b04bad663f88dde543f30e2a78e564b23b0b4be72e3e332f36b94e2089da54"
+    },
+    "TokenReciboRoomlenV2": {
+      "address": "0xF8F626afB4AadB41Be7D746e53Ff417735b1C289",
+      "abi": "../abis/TokenReciboRoomlenV2.json",
+      "verified": false,
+      "explorerUrl": "https://sepolia.basescan.org/address/0xF8F626afB4AadB41Be7D746e53Ff417735b1C289",
+      "deploymentTx": "0x422e38b7905b76d084baaadebe69f5bee7b9925dd72298f072b8aecf01b53a9a"
+    },
+    "LendingProtocolV2": {
+      "address": "0xeD9018D47ee787C5d84A75A42Df786b8540cC75b",
+      "abi": "../abis/LendingProtocolV2.json",
+      "verified": false,
+      "explorerUrl": "https://sepolia.basescan.org/address/0xeD9018D47ee787C5d84A75A42Df786b8540cC75b",
+      "deploymentTx": "0x5317a5a127435dfd9d5f52294e97eb6b7615e1b39ad08f00958a0404d192c553"
+    },
+    "SecondaryMarketV2": {
+      "address": "0x9c2be1158ba6B8ED8B528B685058F743336b988F",
+      "abi": "../abis/SecondaryMarketV2.json",
+      "verified": false,
+      "explorerUrl": "https://sepolia.basescan.org/address/0x9c2be1158ba6B8ED8B528B685058F743336b988F",
+      "deploymentTx": "0xfad3b07f009ad41ec52037b7a0ea0adbf37a87bc3ef0791c3045592c53aefe82"
+    }
+  },
+  "supportedTokens": {
+    "USDC": {
+      "address": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "decimals": 6,
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "explorerUrl": "https://sepolia.basescan.org/token/0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+    },
+    "USDT": {
+      "address": "0xf8b6097E8c1adFa8B2f37c5876Ed07E87Dcf2C3C",
+      "decimals": 6,
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "explorerUrl": "https://sepolia.basescan.org/token/0xf8b6097E8c1adFa8B2f37c5876Ed07E87Dcf2C3C"
+    }
+  },
+  "riskTiers": [
+    {
+      "name": "Tier A",
+      "scoreThreshold": 80,
+      "haircutBps": 1000,
+      "ocBps": 1000,
+      "interestRateBps": 1200,
+      "description": "Score >= 80, APR 12%"
+    },
+    {
+      "name": "Tier B",
+      "scoreThreshold": 60,
+      "haircutBps": 1500,
+      "ocBps": 1200,
+      "interestRateBps": 1800,
+      "description": "Score >= 60, APR 18%"
+    },
+    {
+      "name": "Tier C",
+      "scoreThreshold": 40,
+      "haircutBps": 2200,
+      "ocBps": 1600,
+      "interestRateBps": 2500,
+      "description": "Score >= 40, APR 25%"
+    }
+  ],
+  "configuration": {
+    "platformFeeBps": 250,
+    "minListingDuration": 3600,
+    "notes": "Deployed on Base Sepolia testnet. Includes Base Builder integration."
+  },
+  "baseBuilder": {
+    "builderAddress": "0x778b35106f7e79Ac51B76f4877fE1D60c214B001",
+    "registered": true,
+    "dashboardUrl": "https://base.org/builder/0x778b35106f7e79Ac51B76f4877fE1D60c214B001"
+  }
+}
