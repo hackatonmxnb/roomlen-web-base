@@ -135,42 +135,68 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     try {
       let connector;
 
+      console.log('Available connectors:', connectors.map(c => ({ id: c.id, name: c.name })));
+
       if (walletType === 'metamask') {
         // Try to find MetaMask connector (injected)
-        connector = connectors.find((c) => c.id === 'injected' || c.name === 'MetaMask');
+        connector = connectors.find((c) => c.id === 'injected' || c.name.toLowerCase().includes('metamask'));
 
         if (!connector && typeof window !== 'undefined' && (window as any).ethereum) {
           // If connector not found but MetaMask is available, use the first injected connector
           connector = connectors.find((c) => c.id === 'injected');
         }
+
+        if (!connector) {
+          alert('MetaMask not detected. Please install MetaMask extension.');
+          window.open('https://metamask.io/download/', '_blank');
+          return;
+        }
       } else if (walletType === 'coinbase') {
-        connector = connectors.find((c) => c.id === 'coinbaseWalletSDK');
+        // Coinbase Wallet SDK connector ID can vary - try multiple patterns
+        connector = connectors.find((c) =>
+          c.id === 'coinbaseWalletSDK' ||
+          c.id === 'coinbaseWallet' ||
+          c.name.toLowerCase().includes('coinbase')
+        );
+
+        if (!connector) {
+          console.error('Coinbase Wallet connector not found. Available connectors:', connectors);
+          alert('Coinbase Wallet not available. Please install Coinbase Wallet extension or mobile app.');
+          window.open('https://www.coinbase.com/wallet', '_blank');
+          return;
+        }
       }
 
       if (!connector) {
-        if (walletType === 'metamask') {
-          alert('MetaMask not detected. Please install MetaMask extension.');
-          window.open('https://metamask.io/download/', '_blank');
-        } else {
-          alert('Connector not found. Please refresh the page.');
-        }
+        alert('Wallet connector not found. Please refresh the page.');
         return;
       }
 
-      await connect({ connector });
+      console.log('Connecting with connector:', connector.name, connector.id);
 
-      // After connection, switch to Base Sepolia if needed
+      await connect({ connector, chainId: BASE_SEPOLIA_CHAIN_ID });
+
+      // After connection, verify we're on Base Sepolia
       setTimeout(async () => {
-        const currentChainId = await (window as any).ethereum?.request({ method: 'eth_chainId' });
-        if (currentChainId !== '0x14a34') {
-          await switchToBaseSepolia();
+        try {
+          if (typeof window !== 'undefined' && (window as any).ethereum) {
+            const currentChainId = await (window as any).ethereum.request({ method: 'eth_chainId' });
+            console.log('Current chain ID:', currentChainId);
+            if (currentChainId !== '0x14a34') {
+              console.log('Wrong network, switching to Base Sepolia...');
+              await switchToBaseSepolia();
+            }
+          }
+        } catch (error) {
+          console.error('Error checking/switching network:', error);
         }
-      }, 500);
+      }, 1000);
 
       setIsModalOpen(false);
     } catch (error) {
       console.error(`Error connecting to ${walletType}:`, error);
-      alert(`Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to connect to ${walletType === 'coinbase' ? 'Coinbase Wallet' : 'MetaMask'}:\n\n${errorMessage}\n\nPlease try:\n1. Refresh the page\n2. Make sure your wallet is unlocked\n3. Try a different browser`);
     }
   };
 

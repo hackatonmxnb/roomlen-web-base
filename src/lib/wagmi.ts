@@ -2,7 +2,7 @@
 
 import { http, cookieStorage, createConfig, createStorage } from 'wagmi';
 import { baseSepolia } from 'wagmi/chains';
-import { coinbaseWallet, injected } from 'wagmi/connectors';
+import { coinbaseWallet, injected, walletConnect } from 'wagmi/connectors';
 
 export const config = createConfig({
   chains: [baseSepolia],
@@ -11,9 +11,22 @@ export const config = createConfig({
       target: 'metaMask',
     }),
     coinbaseWallet({
-      appName: 'RoomLen',
-      appLogoUrl: '/base_square.png',
-      preference: 'smartWalletOnly', // Use Smart Wallet (Base Account)
+      appName: 'RoomLen - Rent-Backed Lending',
+      appLogoUrl: 'https://roomlen.netlify.app/roomlenlogo.png',
+      preference: 'all', // Support both EOA and Smart Wallet
+      version: '4',
+      headlessMode: false,
+      reloadOnDisconnect: false,
+    }),
+    walletConnect({
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'roomlen_base_batches',
+      metadata: {
+        name: 'RoomLen',
+        description: 'Turn rental agreements into instant liquidity on Base',
+        url: 'https://roomlen.netlify.app',
+        icons: ['https://roomlen.netlify.app/roomlenlogo.png']
+      },
+      showQrModal: true,
     }),
   ],
   storage: createStorage({
@@ -21,7 +34,11 @@ export const config = createConfig({
   }),
   ssr: true,
   transports: {
-    [baseSepolia.id]: http(),
+    [baseSepolia.id]: http('https://sepolia.base.org', {
+      batch: true,
+      retryCount: 3,
+      timeout: 30_000,
+    }),
   },
 });
 
