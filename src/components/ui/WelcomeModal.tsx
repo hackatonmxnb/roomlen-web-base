@@ -27,13 +27,13 @@ export function WelcomeModal({ onClose, onStartTour }: WelcomeModalProps) {
               <div className="flex items-start gap-2">
                 <span className="text-lg">💰</span>
                 <div>
-                  <strong>If you're an owner:</strong> Get up to 90% of your future rent TODAY
+                  <strong>If you&apos;re an owner:</strong> Get up to 90% of your future rent TODAY
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-lg">📈</span>
                 <div>
-                  <strong>If you're an investor:</strong> Earn 15-28% annual returns
+                  <strong>If you&apos;re an investor:</strong> Earn 15-28% annual returns
                 </div>
               </div>
             </div>
@@ -91,7 +91,7 @@ export function WelcomeModal({ onClose, onStartTour }: WelcomeModalProps) {
       content: (
         <div className="space-y-4">
           <p className="text-slate-700 leading-relaxed">
-            You don't need to know anything about cryptocurrencies or blockchain. We'll guide you through each step:
+            You don&apos;t need to know anything about cryptocurrencies or blockchain. We&apos;ll guide you through each step:
           </p>
 
           <div className="space-y-3">

@@ -124,7 +124,7 @@ function TopBar({ onShowWelcome }: { onShowWelcome: () => void }){
         <div className="flex items-center gap-3">
           {isConnected && (
             <>
-              <Link className="btn-outline ring-slate-300 hover:ring-slate-400 hidden sm:inline-flex" href="/owner">I'm an Owner</Link>
+              <Link className="btn-outline ring-slate-300 hover:ring-slate-400 hidden sm:inline-flex" href="/owner">I&apos;m an Owner</Link>
               <Link className="btn hidden sm:inline-flex" style={{background:"var(--rf-blue)"}} href="/investor">I want to Invest</Link>
             </>
           )}

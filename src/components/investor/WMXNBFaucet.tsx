@@ -96,7 +96,7 @@ export function USDCFaucet() {
         <div className="mb-3 p-3 rounded-lg bg-white border border-green-200">
           <p className="text-xs text-slate-700 leading-relaxed">
             <strong>Why USDC?</strong> RoomLen uses USDC as its native token on Base.
-            It's a stablecoin pegged to US Dollar, making transactions simpler and more predictable.
+            It&apos;s a stablecoin pegged to US Dollar, making transactions simpler and more predictable.
             Get free testnet USDC from the Base faucet!
           </p>
         </div>

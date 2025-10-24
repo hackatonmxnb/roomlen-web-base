@@ -322,7 +322,7 @@ export function SecondaryMarketTab() {
         <div>
           {myTRRs.length === 0 ? (
             <div className="rounded-lg bg-slate-50 p-6 text-center">
-              <p className="text-sm text-slate-600">You don't have any TRR tokens yet</p>
+              <p className="text-sm text-slate-600">You don&apos;t have any TRR tokens yet</p>
               <p className="text-xs text-slate-500 mt-1">
                 Fund a loan to receive a TRR token
               </p>

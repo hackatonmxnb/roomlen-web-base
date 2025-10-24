@@ -151,7 +151,7 @@ const DemoPropertiesCard = ({ leases, onTokenize }: { leases: Lease[], onTokeniz
                         <HelpTooltip {...OWNER_TERMS.nft} />
                     </div>
                     <p className="text-sm text-slate-700 leading-relaxed">
-                        Click <strong>"Tokenize"</strong> to convert your rental contract into a digital NFT on <strong>Base blockchain</strong>.
+                        Click <strong>&quot;Tokenize&quot;</strong> to convert your rental contract into a digital NFT on <strong>Base blockchain</strong>.
                         This enables you to request cash advances!
                     </p>
                 </div>

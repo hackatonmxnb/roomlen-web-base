@@ -12,19 +12,18 @@ export const config = createConfig({
     }),
     coinbaseWallet({
       appName: 'RoomLen - Rent-Backed Lending',
-      appLogoUrl: 'https://roomlen.netlify.app/roomlenlogo.png',
+      appLogoUrl: 'https://roomlenbase.netlify.app/roomlenlogo.png',
       preference: 'all', // Support both EOA and Smart Wallet
       version: '4',
       headlessMode: false,
-      reloadOnDisconnect: false,
     }),
     walletConnect({
       projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'roomlen_base_batches',
       metadata: {
         name: 'RoomLen',
         description: 'Turn rental agreements into instant liquidity on Base',
-        url: 'https://roomlen.netlify.app',
-        icons: ['https://roomlen.netlify.app/roomlenlogo.png']
+        url: 'https://roomlenbase.netlify.app',
+        icons: ['https://roomlenbase.netlify.app/roomlenlogo.png']
       },
       showQrModal: true,
     }),
