@@ -2,7 +2,7 @@
 
 # 🏠 RoomLen
 
-### **Turn Rental Agreements into Instant Liquidity**
+### **"Live, Grow, Earn**
 
 **Unlock capital from signed leases. Built natively on Base.**
 
@@ -18,7 +18,7 @@
 
 </div>
 
-**Built with ❤️ from** 🇲🇽 **Mexico &** 🇧🇴 **Bolivia**
+**Built from** 🇲🇽 **Mexico &** 🇧🇴 **Bolivia**
 
 [🎬 Demo](#-quick-demo) • [💡 Problem](#-the-problem) • [⚡ Solution](#-our-solution) • [🏗️ Architecture](#%EF%B8%8F-architecture) • [🧪 Test It](#-test-the-platform)
 
@@ -456,16 +456,11 @@ cast call 0xeD9018D47ee787C5d84A75A42Df786b8540cC75b \
 ✅ **24 comprehensive tests** (100% passing, full coverage)
 
 ### ⚠️ Limitations (Testnet MVP)
-
-This is a **buildathon prototype** on testnet. **Not audited. Not for production.**
-
 - KYC/AML: Planned but not implemented
 - Oracle integration: Simulated (no Chainlink yet)
 - Risk scoring: Simplified model
 - Emergency pause: Implemented but untested in prod
-
-**For production:** Professional audit required.
-
+- 
 ---
 
 ## 🗺️ Roadmap
@@ -618,19 +613,6 @@ Test result: ok. 24 passed; 0 failed; finished in 1.23s
 </div>
 
 ---
-
-## 🏆 Base Batches Achievements
-
-### What We Delivered
-
-✅ **Onchain:** Built natively on Base with gas optimizations
-✅ **Technical:** Functions exactly as pitched with 24 passing tests (100% coverage)
-✅ **Original:** Novel rent-backed lending (first on Base)
-✅ **Viable:** Clear TCP (1M+ owners in LATAM, yield-seeking investors)
-✅ **Specific:** Live testable MVP at https://roomlen.netlify.app
-✅ **Practical:** Anyone can test with faucet USDC in 2 minutes
-✅ **Impact:** Unlocks $50B+ trapped in rental markets
-
 ### Metrics
 
 | Metric | Value |
