@@ -2,7 +2,7 @@
 
 # 🏠 RoomLen
 
-### **"Live,.Grow. Earn"**
+### **" Live .Grow. Earn. "**
 
 **Unlock capital from signed leases. Built natively on Base.**
 
