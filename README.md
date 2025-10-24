@@ -2,7 +2,7 @@
 
 # 🏠 RoomLen
 
-### **"Live, Grow, Earn"**
+### **"Live,.Grow. Earn"**
 
 **Unlock capital from signed leases. Built natively on Base.**
 
@@ -635,7 +635,8 @@ Test result: ok. 24 passed; 0 failed; finished in 1.23s
 
 **RoomLen** - *Unlocking LATAM's $50B rental economy, one lease at a time*
 
-**"Live. Rent. Earn."**
+**"Live. Grow. Earn. "** RoomLen
+**"Live. Rent. Earn."** RoomFi
 
 From 🇲🇽 Mexico & 🇧🇴 Bolivia
 
